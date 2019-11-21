@@ -36,9 +36,18 @@ class Player(object):
         def getChar(self):
             return self.c
 
-        # OVERRIDE THIS in your class, NOTHING ELSE
+        # OVERRIDE THIS in your class!
         # board - current state of the board
         # x,y - your current row and column on the board
+        # You can move a MAX of movesize in a SINGLE direction
+        # 0-3 MOVES a player, 4-7 ATTACKS in that direction,
+        #   if you are mage 8 gets mana back,
+        #   if you are monk 8 gets health back
+
         def getMove(self, board, x, y, movesize):
             # Moves: 0-Up, 1-Right, 2-Down, 3-Left
-            return random.randint(0, 3)
+
+
+            # return (action, move size)
+                # If you attack/spell , THAT IS YOUR ACTION, you cannot move as well
+            return (random.randint(0, 7), random.randint(1, movesize))
