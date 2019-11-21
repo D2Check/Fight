@@ -10,8 +10,14 @@ class Fight(object):
     healths = [" ",None,None]
     manas = [" ", None, None]
     roles = {
+        # "CLASS":{
+        #   "move_size": the MAX spaces you can move,
+        #               it rotates, so for thief, if you moved up to three spaces last time
+        #               you can only move a max of 1 for the next 2 turns
+        #   "dmg": min,max dmg you do if you attack the player
+        # },
         "Thief":{
-            "move_size": [0, 1, 3],
+            "move_size": [1, 1, 3],
             "dmg": [1, 12],
             "dmg_range": 1,
             "health": 100
@@ -97,7 +103,7 @@ class Fight(object):
     def makeMove(self,player):
         tempboard = [row[:] for row in self.board]  # faster than deepcopy
         move,attack = player.getMove(tempboard, player.x, player.y)
-
+        # TODO HERE
 
 
 
