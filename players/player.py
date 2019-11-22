@@ -26,8 +26,6 @@ class Player(object):
         if role not in roles:
             raise AttributeError("Bad Role Chosen", role)
         self.role = role
-        self.__move_index = random.randint(0, len(self.__move_size) - 1)
-        self.next_move_size = self.__move_size[self.__move_index]
 
 
         def getName(self):
@@ -40,9 +38,9 @@ class Player(object):
         # board - current state of the board
         # x,y - your current row and column on the board
         # You can move a MAX of movesize in a SINGLE direction
-        # 0-3 MOVES a player,
+        # 0-3 MOVES a player, -1 to stay still
         # 0-3 ATTACKS in that direction,
-        #   if you are mage 4 gets mana back,
+        #   if you are mage 4 moves you randomly (not near your enemy),
         #   if you are monk 4 gets health back
 
         def getMove(self, board, x, y, movesize):
