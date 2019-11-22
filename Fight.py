@@ -129,7 +129,11 @@ class Fight(object):
         self.moves_index[index] = (self.moves_index[index] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
-        # move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
+        try:
+            # move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
+            pass
+        except:
+            return
         if movesize > allowable_size:
             self.healths[index] = 0
             # print("Player {} decided to cheat. They lose.")
@@ -247,6 +251,8 @@ class Fight(object):
             player.update_stats(self.players[1].to_dict(), self.players[2].to_dict())
         else:
             player.update_stats(self.players[2].to_dict(), self.players[1].to_dict())
+
+        return
 
 
 if __name__ == "__main__":
