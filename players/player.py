@@ -2,8 +2,8 @@ import random
 class Player(object):
     name = None
     enemy_stats = None
-    __health = None
-    __mana = None
+    health = None
+    mana = None
     my_stats = None
     role = None
     me = None # THIS IS YOUR SYMBOL
@@ -29,37 +29,25 @@ class Player(object):
     def get_char(self):
         return self.me
 
-    # OVERRIDE THIS in your class!
-    # board - current state of the board
-    # x,y - your current row and column on the board
-    # You can move a MAX of movesize in a SINGLE direction
-    # 0-3 MOVES a player, -1 to stay still
-    # 0-3 ATTACKS in that direction,
-    #   if you are mage 4 moves you randomly (not near your enemy),
-    #   if you are monk 4 gets health back
-
     def getMove(self, board, x, y, movesize):
         self.x = x
         self.y = y
-        # Moves: 0-Up, 1-Right, 2-Down, 3-Left
-
-
-        # return (move, move size)
-            # If you use a spell, you can't move again
-        return (random.randint(0, 7), random.randint(1, movesize))
+        # attack and move randomly. This will work, right?
+        return (random.randint(0, 3),random.randint(0.3), random.randint(1, movesize))
 
     def to_dict(self):
         return {
             "role"  :self.role,
             "x"     :self.x,
             "y"     :self.y,
-            "health":self.__health,
-            "mana"  :self.__mana,
+            "health":self.health,
+            "mana"  :self.mana,
         }
 
     def update_stats(self,me,enemy):
         self.enemy_stats = enemy
         self.my_stats = me
         # Fight keeps track of both players health and mana independently. This is for YOU.
-        self.__mana = me['mana']
-        self.__health = me['mana']
+        # What I'm saying is, don't try to cheat
+        self.mana = me['mana']
+        self.health = me['mana']

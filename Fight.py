@@ -116,6 +116,7 @@ class Fight(object):
             print("Player 2 won!")
         else:
             print("Player 1 won!")
+
     def makeMove(self, player: Player, index):
         #
         # SETUP
@@ -137,7 +138,7 @@ class Fight(object):
             pass
         except:
             return
-        if movesize > allowable_size:
+        if 0 > movesize > allowable_size:
             self.healths[index] = 0
             # print("Player {} decided to cheat. They lose.")
         #
@@ -232,20 +233,22 @@ class Fight(object):
             #
             skill = True
 
-
         if not skill:
             # print("Using attack")
             # print(enemy.me,targets)
             if enemy.me in targets:
                 # print("hit")
-                min,max = self.roles[player.role]['dmg']
-                dmg = random.randint(min,max)
-                print(self.healths)
+                min, max = self.roles[player.role]['dmg']
+                dmg = random.randint(min, max)
+                # print(self.healths)
                 self.healths[int(enemy.me)] -= dmg
-                print(f"hit for {dmg}")
-                print(self.healths)
+                self.players[1].health =
+                # print(f"hit for {dmg}")
+                # print(self.healths)
+        else:
+            if player.role == "Monk":
 
-
+            elif player.role == "Mage":
 
         #
         # UPDATE EACH PLAYER, EVERY TIME

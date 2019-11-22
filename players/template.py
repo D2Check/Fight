@@ -1,11 +1,14 @@
 from players.player import Player
 
 class YOURNAMEHERE(Player):
+    # Feel free to add variables here.
+    # You don't need to, it might be helpful
 
+    # DONT CHANGE THIS
     def __init__(self, role, c):
-        # print("Xyf {},{}".format(role,c))
         super().__init__(role, c)
         self.name = self.__class__.__name__
+    # DONT CHANGE THIS PART
 
     # OVERRIDE THIS in your class!
     # board - current state of the board
@@ -33,3 +36,6 @@ class YOURNAMEHERE(Player):
         ## YOUR CODE STOP HERE
         if 0<chosen_move_size<=movesize:
             return (move_direction,attack_direction,chosen_move_size)
+
+    # Feel free to add helper functions here.
+    # You don't need to, it might be helpful
