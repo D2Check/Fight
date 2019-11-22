@@ -1,5 +1,6 @@
 from players.player import Player
 
+
 class YOURNAMEHERE(Player):
     # Feel free to add variables here.
     # You don't need to, it might be helpful
@@ -8,6 +9,7 @@ class YOURNAMEHERE(Player):
     def __init__(self, role, c):
         super().__init__(role, c)
         self.name = self.__class__.__name__
+
     # DONT CHANGE THIS PART
 
     # OVERRIDE THIS in your class!
@@ -21,21 +23,17 @@ class YOURNAMEHERE(Player):
     #   if you are monk 4 gets health back
 
     def getMove(self, board, x, y, movesize):
-        self.x = x
-        self.y = y
+        self.x = x # YOUR X
+        self.y = y # YOUR Y
+        # movesize is how far you can move this turn. you can chose to move 0 >= choice <= movesize
         move_direction = 0
         attack_direction = 0
         chosen_move_size = 0
         ## YOUR CODE HERE
 
-
-
-
-
-
         ## YOUR CODE STOP HERE
-        if 0<chosen_move_size<=movesize:
-            return (move_direction,attack_direction,chosen_move_size)
+        if 0 < chosen_move_size <= movesize:
+            return (move_direction, attack_direction, chosen_move_size)
 
     # Feel free to add helper functions here.
     # You don't need to, it might be helpful
