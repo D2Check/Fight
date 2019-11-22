@@ -22,7 +22,7 @@ class Fight(object):
         #   "mana": Starting mana if thats a thing
         # },
         "Thief": {
-            "move_size": [1, 1, 3],
+            "move_size": [2, 2, 3],
             "dmg": [1, 12],
             "dmg_range": 1,
             "health": 100,
@@ -100,10 +100,16 @@ class Fight(object):
 
     def fight(self):
         assert len(self.players) == 3, "Players aren't the right size: {}".format(len(self.players))
+
         p1 = self.players[1]
         p2 = self.players[2]
 
         while self.healths[1] > 0 and self.healths[2] > 0:
+            for i in range(1, 3):
+                self.players[i].health = self.healths[i]
+                self.players[i].mana = self.manas[i]
+            p1.update_stats(p1.to_dict(), p2.to_dict())
+            p2.update_stats(p2.to_dict(), p2.to_dict())
             if self.next_player_turn == 1:
                 # p1 move
                 self.makeMove(p1, 1)
@@ -112,6 +118,11 @@ class Fight(object):
                 # p2 move
                 self.makeMove(p2, 2)
                 self.next_player_turn -= 1
+            for i in range(1, 3):
+                self.players[i].health = self.healths[i]
+                self.players[i].mana = self.manas[i]
+            p1.update_stats(p1.to_dict(), p2.to_dict())
+            p2.update_stats(p2.to_dict(), p2.to_dict())
         if self.healths[1] <= 0:
             print("Player 2 won!")
         else:
@@ -146,7 +157,7 @@ class Fight(object):
             pass
         except:
             return
-        if -1 > movesize > allowable_size:
+        if 0 > movesize > allowable_size:
             self.healths[me] = 0
             # print("Player {} decided to cheat. They lose.")
         #
@@ -270,20 +281,6 @@ class Fight(object):
                         self.board[newx][newy] = str(index)
                         player.x, player.y = newx, newy
                     self.manas[me] -= 50
-
-        # Set the correct variables
-        for i in range(1, 3):
-            self.players[i].health = self.healths[i]
-            self.players[i].mana = self.manas[i]
-        #
-        # UPDATE EACH PLAYER, EVERY TIME
-        #
-        for curr_player in self.players:
-            if index == 1:
-                curr_player.update_stats(self.players[1].to_dict(), self.players[2].to_dict())
-            else:
-                curr_player.update_stats(self.players[2].to_dict(), self.players[1].to_dict())
-
         return
 
 

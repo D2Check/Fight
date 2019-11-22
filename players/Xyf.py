@@ -39,6 +39,7 @@ class Xyf(Player):
                 if board[i][k] == self.enemy:
                     return i,k
 
+
     # OVERRIDE THIS in your class!
     # board - current state of the board
     # x,y - your current row and column on the board
@@ -52,12 +53,43 @@ class Xyf(Player):
         "left":3
     }
     def getMove(self, board, x, y, movesize):
+        self.x = x  # YOUR X
+        self.y = y  # YOUR Y
+        # movesize is how far you can move this turn. you can chose to move 0 >= choice <= movesize
+        move_direction = 0
+        attack_direction = 0
+        chosen_move_size = 0
+        #
+        # EDIT DOWN
+        #
+        distance_to_enemy = abs(self.enemy_stats.x - self.x) + abs(self.enemy_stats.y - self.y)
         move_possible = []
         ex,ey = self.find_enemy(board)
         print(f"enemy is at ({ex},{ey})")
         if x < ex:
-            
-        return (random.randint(0, 7), random.randint(1, movesize))
+            move_possible.append("right")
+        if x > ex:
+            move_possible.append("left")
+        if y < ey:
+            move_possible.append("down")
+        if y > ey:
+            move_possible.append("up")
+        move_direction = self.directions[move_possible[random.randint(0,len(move_possible)-1)]]
+        neighbors = self.get_neighbors(board,x,y)
+        for i in range(len(neighbors)):
+            if neighbors[i] is not None:
+                if neighbors[i].c == self.enemy:
+                    # my enemy is standing next to me? Still?
+                    chosen_move_size = 0
+                    attack_direction = i
+        if distance_to_enemy >= movesize:
+            chosen_move_size = movesize
+        else:
+
+        future_neighbors = self.get_neighbors()
+
+        if 0 < chosen_move_size <= movesize:
+            return move_direction, attack_direction, chosen_move_size
 
 
 class Tile(object):

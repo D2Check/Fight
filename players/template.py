@@ -16,7 +16,7 @@ class YOURNAMEHERE(Player):
     # board - current state of the board
     # x,y - your current row and column on the board
     # You can move a MAX of movesize in a SINGLE direction
-    # 0-3 MOVES a player, -1 to stay still
+    # 0-3 MOVES a player,
     # Moves: 0-Up, 1-Right, 2-Down, 3-Left
     # 0-3 ATTACKS in that direction,
     #   if you are mage 4 moves you randomly (not near your enemy),
@@ -33,7 +33,7 @@ class YOURNAMEHERE(Player):
 
         ## YOUR CODE STOP HERE
         if 0 < chosen_move_size <= movesize:
-            return (move_direction, attack_direction, chosen_move_size)
+            return move_direction, attack_direction, chosen_move_size
 
     # Feel free to add helper functions here.
     # You don't need to, it might be helpful
