@@ -238,6 +238,8 @@ class Fight(object):
                 print(f"hit for {dmg}")
                 print(self.healths)
 
+
+
         #
         # UPDATE EACH PLAYER, EVERY TIME
         #
