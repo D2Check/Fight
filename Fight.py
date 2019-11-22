@@ -86,7 +86,7 @@ class Fight(object):
         print(boardstr)
 
     def add_players(self, players):
-        players[0].x, players[0].y = 0, 0
+        players[0].x, players[0].y = 17, 18
         players[1].x, players[1].y = 1, 4
         self.players += players
         i = 1
@@ -117,7 +117,7 @@ class Fight(object):
         else:
             print("Player 1 won!")
 
-    def makeMove(self, player: Player, index, move, attack, movesize):
+    def makeMove(self, player: Player, index):
         #
         # SETUP
         #
@@ -142,7 +142,7 @@ class Fight(object):
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
         try:
-            # move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
+            move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
             pass
         except:
             return
@@ -297,5 +297,5 @@ if __name__ == "__main__":
     p2 = players[1]
     f.add_players(players)
     f.print_board()
-    f.makeMove(p2, 2, 3, 4, 1)
+    f.makeMove(p2, 2)
     f.print_board()
