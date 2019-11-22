@@ -103,7 +103,7 @@ class Fight(object):
         p1 = self.players[1]
         p2 = self.players[2]
 
-        while self.healths[1] >= 0 and self.healths[2] >= 0:
+        while self.healths[1] > 0 and self.healths[2] > 0:
             if self.next_player_turn == 1:
                 # p1 move
                 self.makeMove(p1, 1)
@@ -112,8 +112,11 @@ class Fight(object):
                 # p2 move
                 self.makeMove(p2, 2)
                 self.next_player_turn -= 1
-
-    def makeMove(self, player: Player, index, move=None, attack=None, movesize=None):
+        if self.healths[1] <= 0:
+            print("Player 2 won!")
+        else:
+            print("Player 1 won!")
+    def makeMove(self, player: Player, index):
         #
         # SETUP
         #
@@ -130,7 +133,7 @@ class Fight(object):
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
         try:
-            # move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
+            move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
             pass
         except:
             return
@@ -265,5 +268,4 @@ if __name__ == "__main__":
     p2 = players[1]
     f.add_players(players)
     f.print_board()
-    f.makeMove(p2, 2, 3, 0, 1)
-    f.print_board()
+    f.fight()
