@@ -52,7 +52,7 @@ class Fight(object):
             "mana": 100,
             "health": 60
             # don't get hit
-            # Your action will teleport you to a random spot "not near your enemy"
+            # Your action will teleport you to a random corner that the enemy isn't in
             # costs 50 mana
         },
 
@@ -117,7 +117,7 @@ class Fight(object):
         else:
             print("Player 1 won!")
 
-    def makeMove(self, player: Player, index):
+    def makeMove(self, player: Player, index, move, attack, movesize):
         #
         # SETUP
         #
@@ -126,20 +126,28 @@ class Fight(object):
         currx = player.x
         curry = player.y
         tarx, tary = None, None
+        me = None
+        enemy = None
+        if index == 1:
+            me = index
+            enemy = 2
+        else:
+            me = 2
+            enemy = 1
 
         # DATA TO SEND THE PLAYER
         tempboard = [row[:] for row in self.board]  # faster than deepcopy
-        allowable_size = self.roles[player.role]["move_size"][int(self.moves_index[index])]
-        self.moves_index[index] = (self.moves_index[index] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
+        allowable_size = self.roles[player.role]["move_size"][int(self.moves_index[me])]
+        self.moves_index[me] = (self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
         try:
-            move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
+            # move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
             pass
         except:
             return
-        if 0 > movesize > allowable_size:
-            self.healths[index] = 0
+        if -1 > movesize > allowable_size:
+            self.healths[me] = 0
             # print("Player {} decided to cheat. They lose.")
         #
         # MOVEMENT
@@ -174,17 +182,20 @@ class Fight(object):
                 newx >= self.board_size or \
                 newy < 0 or \
                 newy >= self.board_size:
+            # Tried to move off the board
             # print("invalid move")
             newx = currx
             newy = curry
 
         if self.board[newx][newy] == "1" or self.board[newx][newy] == "2":
+            # Tried to move onto a player
             newx = currx
             newy = curry
 
         # If the move is valid, mark that square as unoccupied
         # print(f"curr:({currx},{curry}) new:({newx},{newy})")
         if currx != newx or newy != curry:
+            # Valid move and some type of movement happened
             # print(f"({currx},{curry}) set to .")
             self.board[currx][curry] = "."
         self.board[newx][newy] = str(index)
@@ -193,11 +204,6 @@ class Fight(object):
         #
         # ATTACK
         #
-        enemy = None
-        if index == 1:
-            enemy = self.players[2]
-        else:
-            enemy = self.players[1]
 
         attack_size = self.roles[player.role]["dmg_range"]
         tarx, tary = None, None
@@ -236,27 +242,47 @@ class Fight(object):
         if not skill:
             # print("Using attack")
             # print(enemy.me,targets)
-            if enemy.me in targets:
+            if self.players[enemy].me in targets:
                 # print("hit")
                 min, max = self.roles[player.role]['dmg']
                 dmg = random.randint(min, max)
                 # print(self.healths)
-                self.healths[int(enemy.me)] -= dmg
-                self.players[1].health =
+                self.healths[enemy] -= dmg
+
                 # print(f"hit for {dmg}")
                 # print(self.healths)
         else:
-            if player.role == "Monk":
+            if self.manas[me] is not None:
+                if self.manas[me] >= 50:
+                    if player.role == "Monk":
+                        player.health += 30
+                    elif player.role == "Mage":
+                        ex, ey = self.players[enemy].x, self.players[enemy].y
+                        eloc = [ex, ey]
+                        locations = [[0, 0], [0, 19], [19, 0], [19, 19]]
+                        if eloc in locations:
+                            # The other player put themselves in a corner we can't go there
+                            locations.remove(eloc)
+                        # BLINK
+                        self.board[newx][newy] = "."
+                        random.shuffle(locations)
+                        newx, newy = locations[random.randint(0, len(locations) - 1)]
+                        self.board[newx][newy] = str(index)
+                        player.x, player.y = newx, newy
+                    self.manas[me] -= 50
 
-            elif player.role == "Mage":
-
+        # Set the correct variables
+        for i in range(1, 3):
+            self.players[i].health = self.healths[i]
+            self.players[i].mana = self.manas[i]
         #
         # UPDATE EACH PLAYER, EVERY TIME
         #
-        if index == 1:
-            player.update_stats(self.players[1].to_dict(), self.players[2].to_dict())
-        else:
-            player.update_stats(self.players[2].to_dict(), self.players[1].to_dict())
+        for curr_player in self.players:
+            if index == 1:
+                curr_player.update_stats(self.players[1].to_dict(), self.players[2].to_dict())
+            else:
+                curr_player.update_stats(self.players[2].to_dict(), self.players[1].to_dict())
 
         return
 
@@ -271,4 +297,5 @@ if __name__ == "__main__":
     p2 = players[1]
     f.add_players(players)
     f.print_board()
-    f.fight()
+    f.makeMove(p2, 2, 3, 4, 1)
+    f.print_board()
