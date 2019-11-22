@@ -16,29 +16,47 @@ class Xyf(Player):
         neighbors = [None for e in range(4)]
         if x + 1 < 20:
             # right
-            if board[x + 1][y] != self.o:
+            if board[x + 1][y] != self.enemy:
                 neighbors[1] = Tile(x + 1, y, board[x + 1][y])
         if x - 1 >= 0:
             # Left
-            if board[x - 1][y] != self.o:
+            if board[x - 1][y] != self.enemy:
                 neighbors[3] = Tile(x - 1, y, board[x - 1][y])
         if y - 1 >= 0:
             # up
-            if board[x][y - 1] != self.o:
+            if board[x][y - 1] != self.enemy:
                 neighbors[0] = Tile(x, y - 1, board[x][y - 1])
 
         if y + 1 < 20:
             # down
-            if board[x][y + 1] != self.o:
+            if board[x][y + 1] != self.enemy:
                 neighbors[2] = Tile(x, y + 1, board[x][y + 1])
         return neighbors
+
+    def find_enemy(self,board):
+        for i in range(len(board)):
+            for k in range(len(board)):
+                if board[i][k] == self.enemy:
+                    return i,k
 
     # OVERRIDE THIS in your class!
     # board - current state of the board
     # x,y - your current row and column on the board
     # You can move a MAX of movesize in a SINGLE direction
     # 0-3 MOVES a player, 4-7 ATTACKS in that direction
+    # 0-Up, 1-Right, 2-Down, 3-Left
+    directions = {
+        "up":0,
+        "right":1,
+        "down":2,
+        "left":3
+    }
     def getMove(self, board, x, y, movesize):
+        move_possible = []
+        ex,ey = self.find_enemy(board)
+        print(f"enemy is at ({ex},{ey})")
+        if x < ex:
+            
         return (random.randint(0, 7), random.randint(1, movesize))
 
 
