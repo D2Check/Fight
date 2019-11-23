@@ -5,9 +5,10 @@ from players.player import Player
 
 
 class Xyf(Player):
+    # THIEF
 
     def __init__(self, role, c):
-        # print("Xyf {},{}".format(role,c))
+        role = "Thief"
         super().__init__(role, c)
         self.name = self.__class__.__name__
 
@@ -33,12 +34,11 @@ class Xyf(Player):
                 neighbors[2] = Tile(x, y + 1, board[x][y + 1])
         return neighbors
 
-    def find_enemy(self,board):
+    def find_enemy(self, board):
         for i in range(len(board)):
             for k in range(len(board)):
                 if board[i][k] == self.enemy:
-                    return i,k
-
+                    return i, k
 
     # OVERRIDE THIS in your class!
     # board - current state of the board
@@ -47,11 +47,12 @@ class Xyf(Player):
     # 0-3 MOVES a player, 4-7 ATTACKS in that direction
     # 0-Up, 1-Right, 2-Down, 3-Left
     directions = {
-        "up":0,
-        "right":1,
-        "down":2,
-        "left":3
+        "up": 0,
+        "right": 1,
+        "down": 2,
+        "left": 3
     }
+
     def getMove(self, board, x, y, movesize):
         self.x = x  # YOUR X
         self.y = y  # YOUR Y
@@ -64,7 +65,7 @@ class Xyf(Player):
         #
         distance_to_enemy = abs(self.enemy_stats.x - self.x) + abs(self.enemy_stats.y - self.y)
         move_possible = []
-        ex,ey = self.find_enemy(board)
+        ex, ey = self.find_enemy(board)
         print(f"enemy is at ({ex},{ey})")
         if x < ex:
             move_possible.append("right")
@@ -74,20 +75,36 @@ class Xyf(Player):
             move_possible.append("down")
         if y > ey:
             move_possible.append("up")
-        move_direction = self.directions[move_possible[random.randint(0,len(move_possible)-1)]]
-        neighbors = self.get_neighbors(board,x,y)
+        move_direction = self.directions[move_possible[random.randint(0, len(move_possible) - 1)]]
+
+        if distance_to_enemy >= movesize:
+            chosen_move_size = movesize
+        else:
+            chosen_move_size = distance_to_enemy
+        futurex, futurey = 0, 0
+        if move_direction == 0:
+            futurey = y - chosen_move_size
+        elif move_direction == 1:
+            futurex = x + chosen_move_size
+        elif move_direction == 2:
+            futurey = y + chosen_move_size
+        elif move_direction == 3:
+            futurex = x - chosen_move_size
+
+        future_neighbors = self.get_neighbors(futurex, futurey)
+
+        for i in range(len(future_neighbors)):
+            if future_neighbors[i] is not None:
+                if future_neighbors[i].c == self.enemy:
+                    attack_direction = i
+
+        neighbors = self.get_neighbors(board, x, y)
         for i in range(len(neighbors)):
             if neighbors[i] is not None:
                 if neighbors[i].c == self.enemy:
                     # my enemy is standing next to me? Still?
                     chosen_move_size = 0
                     attack_direction = i
-        if distance_to_enemy >= movesize:
-            chosen_move_size = movesize
-        else:
-
-        future_neighbors = self.get_neighbors()
-
         if 0 < chosen_move_size <= movesize:
             return move_direction, attack_direction, chosen_move_size
 
@@ -100,7 +117,6 @@ class Tile(object):
     c = " "
 
     def __init__(self, x, y, c):
-        self.value = self.get_value_of_fruit(c)
         self.x = x
         self.y = y
         self.c = c
