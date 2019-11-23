@@ -54,11 +54,9 @@ class Xyf(Player):
     }
 
     def getMove(self, board, x, y, movesize):
-        # print("This is getting called")
         self.x = x  # YOUR X
         self.y = y  # YOUR Y
         # movesize is how far you can move this turn. you can chose to move 0 >= choice <= movesize
-        # print("here1")
         move_direction = 0
         attack_direction = 0
         chosen_move_size = 0
@@ -66,25 +64,35 @@ class Xyf(Player):
         # EDIT DOWN
         #
         distance_to_enemy = abs(self.enemy_stats['x'] - self.x) + abs(self.enemy_stats['y'] - self.y)
-        # print("here2")
-
-        move_possible = []
-        ex, ey = self.find_enemy(board)
-        # print(f"enemy is at ({ex},{ey})")
-        if x < ex:
-            move_possible.append("right")
-        if x > ex:
-            move_possible.append("left")
-        if y < ey:
-            move_possible.append("down")
-        if y > ey:
-            move_possible.append("up")
-        move_direction = self.directions[move_possible[random.randint(0, len(move_possible) - 1)]]
-
         if distance_to_enemy >= movesize:
             chosen_move_size = movesize
         else:
             chosen_move_size = distance_to_enemy
+        move_possible = []
+        ex, ey = self.find_enemy(board)
+        # print(f"enemy is at ({ex},{ey})")
+        if x < ex:
+            if x + chosen_move_size <= 19:
+                # print(f"right")
+                move_possible.append("right")
+        if x > ex:
+            if x - chosen_move_size >=0:
+                # print(f"left")
+
+                move_possible.append("left")
+        if y < ey:
+            if y + chosen_move_size >=0:
+                # print(f"down")
+
+                move_possible.append("down")
+        if y > ey:
+            if y - chosen_move_size <= 19:
+                # print(f"up")
+
+                move_possible.append("up")
+
+        move_direction = self.directions[move_possible[random.randint(0, len(move_possible) - 1)]]
+
         futurex, futurey = 0, 0
         if move_direction == 0:
             futurey = y - chosen_move_size
