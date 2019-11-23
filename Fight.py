@@ -305,4 +305,4 @@ if __name__ == "__main__":
 
     f.add_players(players)
     f.print_board()
-    # print(f"Winner is {f.fight()}")
+    print(f"Winner is {f.fight()}")
