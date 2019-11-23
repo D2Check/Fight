@@ -54,19 +54,23 @@ class Xyf(Player):
     }
 
     def getMove(self, board, x, y, movesize):
+        # print("This is getting called")
         self.x = x  # YOUR X
         self.y = y  # YOUR Y
         # movesize is how far you can move this turn. you can chose to move 0 >= choice <= movesize
+        # print("here1")
         move_direction = 0
         attack_direction = 0
         chosen_move_size = 0
         #
         # EDIT DOWN
         #
-        distance_to_enemy = abs(self.enemy_stats.x - self.x) + abs(self.enemy_stats.y - self.y)
+        distance_to_enemy = abs(self.enemy_stats['x'] - self.x) + abs(self.enemy_stats['y'] - self.y)
+        # print("here2")
+
         move_possible = []
         ex, ey = self.find_enemy(board)
-        print(f"enemy is at ({ex},{ey})")
+        # print(f"enemy is at ({ex},{ey})")
         if x < ex:
             move_possible.append("right")
         if x > ex:
@@ -91,7 +95,7 @@ class Xyf(Player):
         elif move_direction == 3:
             futurex = x - chosen_move_size
 
-        future_neighbors = self.get_neighbors(futurex, futurey)
+        future_neighbors = self.get_neighbors(board,futurex, futurey)
 
         for i in range(len(future_neighbors)):
             if future_neighbors[i] is not None:
@@ -105,7 +109,9 @@ class Xyf(Player):
                     # my enemy is standing next to me? Still?
                     chosen_move_size = 0
                     attack_direction = i
-        if 0 < chosen_move_size <= movesize:
+        # print(f"==={chosen_move_size} {movesize}")
+        if 0 <= chosen_move_size <= movesize:
+            # print("yes")
             return move_direction, attack_direction, chosen_move_size
 
 
