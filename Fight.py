@@ -7,10 +7,10 @@ class Fight(object):
     board = None
     board_size = None
     next_player_turn = None
-    players = [" "]
-    healths = [" ", None, None]
-    manas = [" ", None, None]
-    moves_index = [" ", None, None]
+    players = None
+    healths = None
+    manas = None
+    moves_index = None
     roles = {
         # "CLASS":{
         #   "move_size": the MAX spaces you can move,
@@ -59,6 +59,7 @@ class Fight(object):
     }
 
     def __init__(self, size):
+        # print("Fight is made")
         self.__setup(size)
 
     def __setup(self, size):
@@ -91,17 +92,26 @@ class Fight(object):
     def add_players(self, players):
         players[0].x, players[0].y = 0, 0
         players[1].x, players[1].y = 19, 19
-        self.players += players
+        newplayers = [" "]
+        newhealths = [" "]
+        newmanas = [" "]
+        newmoves_index = [" "]
+
         i = 1
         for player in players[0:]:
-            self.healths[i] = 100
-            if player.role == "Mage" or player.role == "Monk":
-                self.manas[i] = 100
+            newplayers.append(player)
+            newhealths.append(self.roles[player.role]["health"])
+            newmanas.append(self.roles[player.role]["mana"])
             self.set_space(player.x, player.y, player.me)
-            self.moves_index[i] = random.randint(0, len(self.roles[player.role]["move_size"]) - 1)
+            newmoves_index.append(random.randint(0, len(self.roles[player.role]["move_size"]) - 1))
             i += 1
+        self.players = newplayers
+        self.healths = newhealths
+        self.manas = newmanas
+        self.moves_index = newmoves_index
 
     def fight(self):
+        # print(self.players)
         assert len(self.players) == 3, "Players aren't the right size: {}".format(len(self.players))
 
         p1 = self.players[1]
@@ -297,12 +307,20 @@ class Fight(object):
 
 
 if __name__ == "__main__":
-    f = Fight(20)
-    players = [
-        Xyf("Thief", "1"),
-        Player("Warrior", "2")
-    ]
 
-    f.add_players(players)
-    f.print_board()
-    print(f"Winner is {f.fight()}")
+    wins = [0,0]
+    games = 1000
+    while games >0:
+        # print(f"games: {games}")
+        f = Fight(20)
+        players = [
+            Xyf("Thief", "1"),
+            Player("Warrior", "2")
+        ]
+
+        f.add_players(players)
+        # f.print_board()
+        games -= 1
+        winner = f.fight() -1
+        wins[winner] += 1
+    print(wins)
