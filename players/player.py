@@ -33,7 +33,7 @@ class Player(object):
         self.x = x
         self.y = y
         # attack and move randomly. This will work, right?
-        return (random.randint(0, 3),random.randint(0.3), random.randint(1, movesize))
+        return random.randint(0, 3),random.randint(0,3), random.randint(1, movesize)
 
     def to_dict(self):
         return {
