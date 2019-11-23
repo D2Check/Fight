@@ -1,6 +1,7 @@
 import random
 from players.player import Player
 from players.Xyf import Xyf
+import time
 
 
 class Fight(object):
@@ -111,9 +112,9 @@ class Fight(object):
             p1.update_stats(p1.to_dict(), p2.to_dict())
             p2.update_stats(p2.to_dict(), p2.to_dict())
             # print(f"nextplayerturn{self.next_player_turn}")
+
             if self.next_player_turn == 1:
                 # p1 move
-
                 self.makeMove(p1, 1)
                 self.next_player_turn += 1
             else:
@@ -155,7 +156,9 @@ class Fight(object):
         self.moves_index[me] = (self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
+        start = time.time()
         move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
+        print(f"Move took {time.time()-start}")
         if 0 > movesize > allowable_size:
             self.healths[me] = 0
             # print("Player {} decided to cheat. They lose.")
@@ -235,7 +238,7 @@ class Fight(object):
             tarx = newx + attack_size
             if tarx > self.board_size-1:
                 tarx = self.board_size-1
-            print(f"new:{newx}, tarx:{tarx} newy:{newy}")
+            # print(f"new:{newx}, tarx:{tarx} newy:{newy}")
             for i in range(newx,tarx):
                 targets.append(self.board[i][newy])
 
@@ -269,7 +272,7 @@ class Fight(object):
                 # print(self.healths)
                 self.healths[enemy] -= dmg
 
-                # print(f"hit for {dmg}")
+                print(f"Player{enemy} hit for {dmg}")
                 # print(self.healths)
         else:
             if self.manas[me] is not None:
