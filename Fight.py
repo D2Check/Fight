@@ -86,8 +86,8 @@ class Fight(object):
         print(boardstr)
 
     def add_players(self, players):
-        players[0].x, players[0].y = 17, 18
-        players[1].x, players[1].y = 1, 4
+        players[0].x, players[0].y = 0, 0
+        players[1].x, players[1].y = 19, 19
         self.players += players
         i = 1
         for player in players[0:]:
@@ -110,8 +110,10 @@ class Fight(object):
                 self.players[i].mana = self.manas[i]
             p1.update_stats(p1.to_dict(), p2.to_dict())
             p2.update_stats(p2.to_dict(), p2.to_dict())
+            # print(f"nextplayerturn{self.next_player_turn}")
             if self.next_player_turn == 1:
                 # p1 move
+
                 self.makeMove(p1, 1)
                 self.next_player_turn += 1
             else:
@@ -123,6 +125,7 @@ class Fight(object):
                 self.players[i].mana = self.manas[i]
             p1.update_stats(p1.to_dict(), p2.to_dict())
             p2.update_stats(p2.to_dict(), p2.to_dict())
+            self.print_board()
         if self.healths[1] <= 0:
             print("Player 2 won!")
         else:
@@ -152,11 +155,7 @@ class Fight(object):
         self.moves_index[me] = (self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
-        try:
-            move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
-            pass
-        except:
-            return
+        move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
         if 0 > movesize > allowable_size:
             self.healths[me] = 0
             # print("Player {} decided to cheat. They lose.")
@@ -217,34 +216,44 @@ class Fight(object):
         #
 
         attack_size = self.roles[player.role]["dmg_range"]
-        tarx, tary = None, None
         skill = False
+        tarx = newx
+        tary = newy
+        targets = []
+
         if attack == 0:
             # up
             tary = newy - attack_size
-            tarx = newx
+            if tary < 0 :
+                tary = 0
             # print(f"targeting from ({newx},{newy}) to ({tarx},{tary})")
-            targets = self.board[newx][tary:newy]
+            for i in range(tary,newy):
+                targets.append(self.board[newx][i])
 
         elif attack == 1:
             # right
-            tary = newy
             tarx = newx + attack_size
-            targets = self.board[newx:tarx][newy]
+            if tarx > self.board_size-1:
+                tarx = self.board_size-1
+            print(f"new:{newx}, tarx:{tarx} newy:{newy}")
+            for i in range(newx,tarx):
+                targets.append(self.board[i][newy])
 
         elif attack == 2:
             # down
             tary = newy + attack_size
-            tarx = newx
-            targets = self.board[newx][tary:newy]
+            if tary > self.board_size-1:
+                tary = self.board_size-1
+            for i in range(newy,tary):
+                targets.append(self.board[newx][i])
         elif attack == 3:
             # left
-            tary = newy
             tarx = newx - attack_size
-            targets = self.board[tarx:newx][newy]
+            if tarx < 0 :
+                tarx = 0
+            for i in range(tarx,newx):
+                targets.append(self.board[i][newy])
         elif attack == 4:
-            tary = newy
-            tarx = newx
             #
             # THIS IS A SPECIAL CASE DO NOT TARGET
             #
@@ -288,11 +297,9 @@ if __name__ == "__main__":
     f = Fight(20)
     players = [
         Xyf("Thief", "1"),
-        Xyf("Mage", "2")
+        Player("Warrior", "2")
     ]
     p1 = players[0]
     p2 = players[1]
     f.add_players(players)
-    f.print_board()
-    f.makeMove(p2, 2)
-    f.print_board()
+    f.fight()
