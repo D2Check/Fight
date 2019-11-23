@@ -70,7 +70,8 @@ class Xyf(Player):
             chosen_move_size = distance_to_enemy
         move_possible = []
         ex, ey = self.find_enemy(board)
-        # print(f"enemy is at ({ex},{ey})")
+        print(f"enemy is at ({ex},{ey})")
+        print(f"I am at {x},{y}")
         if x < ex:
             if x + chosen_move_size <= 19:
                 # print(f"right")
@@ -81,18 +82,22 @@ class Xyf(Player):
 
                 move_possible.append("left")
         if y < ey:
-            if y + chosen_move_size >=0:
+            if y - chosen_move_size >=0:
                 # print(f"down")
 
                 move_possible.append("down")
         if y > ey:
-            if y - chosen_move_size <= 19:
+            if y + chosen_move_size <= 19:
                 # print(f"up")
 
                 move_possible.append("up")
-
+        if len(move_possible) == 0:
+            print("enemy and I are on the same axis")
+        print("move pos",move_possible)
         move_direction = self.directions[move_possible[random.randint(0, len(move_possible) - 1)]]
 
+        print("move dir",move_direction)
+        # print(f"Want to move {move_possible[move_direction]}")
         futurex, futurey = 0, 0
         if move_direction == 0:
             futurey = y - chosen_move_size
@@ -102,8 +107,11 @@ class Xyf(Player):
             futurey = y + chosen_move_size
         elif move_direction == 3:
             futurex = x - chosen_move_size
-
-        future_neighbors = self.get_neighbors(board,futurex, futurey)
+        print(f"future is ({futurex},{futurey})")
+        try:
+            future_neighbors = self.get_neighbors(board,futurex, futurey)
+        except:
+            sys.exit()
 
         for i in range(len(future_neighbors)):
             if future_neighbors[i] is not None:

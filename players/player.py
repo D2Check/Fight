@@ -1,4 +1,5 @@
 import random
+
 class Player(object):
     name = None
     enemy_stats = None

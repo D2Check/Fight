@@ -1,7 +1,6 @@
 import random
 from players.player import Player
 from players.Xyf import Xyf
-# import time
 
 
 class Fight(object):
@@ -62,17 +61,20 @@ class Fight(object):
     def __init__(self, size):
         self.__setup(size)
 
-    def __build_board(self, size):
-        self.board_size = size
-        return [["."] * size for i in range(size)]
-
     def __setup(self, size):
         coin_flip = random.randint(1, 2)
         self.next_player_turn = coin_flip
         self.board = self.__build_board(size)
 
+    def __build_board(self, size):
+        self.board_size = size
+        return [["."] * size for i in range(size)]
+
     def set_space(self, x, y, c):
-        self.board[x][y] = c
+        if self.board is not None:
+            self.board[x][y] = c
+        else:
+            raise AttributeError("Board is not yet made")
 
     def print_board(self):
         boardstr = "  "
@@ -110,7 +112,7 @@ class Fight(object):
                 self.players[i].health = self.healths[i]
                 self.players[i].mana = self.manas[i]
             p1.update_stats(p1.to_dict(), p2.to_dict())
-            p2.update_stats(p2.to_dict(), p2.to_dict())
+            p2.update_stats(p2.to_dict(), p1.to_dict())
             # print(f"nextplayerturn{self.next_player_turn}")
 
             if self.next_player_turn == 1:
@@ -125,7 +127,7 @@ class Fight(object):
                 self.players[i].health = self.healths[i]
                 self.players[i].mana = self.manas[i]
             p1.update_stats(p1.to_dict(), p2.to_dict())
-            p2.update_stats(p2.to_dict(), p2.to_dict())
+            p2.update_stats(p2.to_dict(), p1.to_dict())
             # self.print_board()
         if self.healths[1] <= 0:
             return 2
@@ -156,9 +158,7 @@ class Fight(object):
         self.moves_index[me] = (self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
-        start = time.time()
         move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
-        # print(f"Move took {time.time()-start}")
         if 0 > movesize > allowable_size:
             self.healths[me] = 0
             # print("Player {} decided to cheat. They lose.")
@@ -302,7 +302,7 @@ if __name__ == "__main__":
         Xyf("Thief", "1"),
         Player("Warrior", "2")
     ]
-    p1 = players[0]
-    p2 = players[1]
+
     f.add_players(players)
-    f.fight()
+    f.print_board()
+    # print(f"Winner is {f.fight()}")
