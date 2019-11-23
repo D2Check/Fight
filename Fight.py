@@ -1,7 +1,7 @@
 import random
 from players.player import Player
 from players.Xyf import Xyf
-import time
+# import time
 
 
 class Fight(object):
@@ -126,11 +126,11 @@ class Fight(object):
                 self.players[i].mana = self.manas[i]
             p1.update_stats(p1.to_dict(), p2.to_dict())
             p2.update_stats(p2.to_dict(), p2.to_dict())
-            self.print_board()
+            # self.print_board()
         if self.healths[1] <= 0:
-            print("Player 2 won!")
+            return 2
         else:
-            print("Player 1 won!")
+            return 1
 
     def makeMove(self, player: Player, index):
         #
@@ -158,7 +158,7 @@ class Fight(object):
         # GET THEIR FEEDBACK
         start = time.time()
         move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
-        print(f"Move took {time.time()-start}")
+        # print(f"Move took {time.time()-start}")
         if 0 > movesize > allowable_size:
             self.healths[me] = 0
             # print("Player {} decided to cheat. They lose.")
@@ -272,7 +272,7 @@ class Fight(object):
                 # print(self.healths)
                 self.healths[enemy] -= dmg
 
-                print(f"Player{enemy} hit for {dmg}")
+                # print(f"Player{enemy} hit for {dmg}")
                 # print(self.healths)
         else:
             if self.manas[me] is not None:
