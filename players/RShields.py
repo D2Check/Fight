@@ -1,17 +1,15 @@
 from players.player import Player
+import random
 
 
-class YOURNAMEHERE(Player):
+class Rshields(Player):
     # Feel free to add variables here.
     # You don't need to, it might be helpful
 
-    # DONT CHANGE THIS
-    def __init__(self,  c):
-        role = "CHOSE YOUR ROLE" # You can replace this with Warrior or Thief or Mage or Monk
+    def __init__(self, c):
+        role = "Warrior"  # DECLARE YOUR ROLE HERE
         super().__init__(role, c)
         self.name = self.__class__.__name__
-
-    # DONT CHANGE THIS PART
 
     # OVERRIDE THIS in your class!
     # board - current state of the board
@@ -24,13 +22,22 @@ class YOURNAMEHERE(Player):
     #   if you are monk 4 gets health back
 
     def getMove(self, board, x, y, movesize):
-        self.x = x # YOUR X
-        self.y = y # YOUR Y
+        self.x = x  # YOUR X
+        self.y = y  # YOUR Y
         # movesize is how far you can move this turn. you can chose to move 0 >= choice <= movesize
-        move_direction = 0
+        move_direction = random.randint(0, 3)
         attack_direction = 0
-        chosen_move_size = 0
+        chosen_move_size = random.randint(1, movesize)
         ## YOUR CODE HERE
+        ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
+        if x + 1 == ex:
+            attack_direction = 1
+        elif x - 1 == ex:
+            attack_direction = 3
+        elif y + 1 == ey:
+            attack_direction = 2
+        else:
+            attack_direction = 0
 
         ## YOUR CODE STOP HERE
         if 0 < chosen_move_size <= movesize:

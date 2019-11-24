@@ -7,7 +7,7 @@ from players.player import Player
 class Xyf(Player):
     # THIEF
 
-    def __init__(self, role, c):
+    def __init__(self, c):
         role = "Thief"
         super().__init__(role, c)
         self.name = self.__class__.__name__
@@ -45,12 +45,6 @@ class Xyf(Player):
                 neighbors[2] = Tile(x, y + 1, board[x][y + 1])
         return neighbors
 
-    def find_enemy(self, board):
-        for i in range(len(board)):
-            for k in range(len(board)):
-                if board[i][k] == self.enemy:
-                    return i, k
-
     # OVERRIDE THIS in your class!
     # board - current state of the board
     # x,y - your current row and column on the board
@@ -81,7 +75,7 @@ class Xyf(Player):
         else:
             chosen_move_size = distance_to_enemy
         move_possible = []
-        ex, ey = self.find_enemy(board)
+        ex, ey = self.enemy_stats['x'],self.enemy_stats['y']
         # print(f"dist to e {distance_to_enemy}")
         if distance_to_enemy == 2:
             chosen_move_size = 1

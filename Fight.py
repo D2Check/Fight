@@ -1,7 +1,7 @@
 import random
 from players.player import Player
 from players.Xyf import Xyf
-
+from players.RShields import Rshields
 
 class Fight(object):
     board = None
@@ -314,8 +314,8 @@ if __name__ == "__main__":
         # print(f"games: {games}")
         f = Fight(20)
         players = [
-            Xyf("Thief", "1"),
-            Player("Warrior", "2")
+            Xyf("1"),
+            Rshields("2")
         ]
 
         f.add_players(players)
