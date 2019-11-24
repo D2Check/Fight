@@ -137,8 +137,8 @@ class Xyf(Player):
 
             attack_direction = 0
 
-        print(f"{self.name} {self.me}\n \tmoving {chosen_move_size} towards {move_direction} {self.sdirections[move_direction]}\n"
-              f"\tattacking {attack_direction} {self.sdirections[attack_direction]}")
+        # print(f"{self.name} {self.me}\n \tmoving {chosen_move_size} towards {move_direction} {self.sdirections[move_direction]}\n"
+        #       f"\tattacking {attack_direction} {self.sdirections[attack_direction]}")
         if 0 <= chosen_move_size <= movesize:
             # print("yes")
             return move_direction, attack_direction, chosen_move_size
