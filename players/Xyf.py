@@ -6,23 +6,14 @@ from players.player import Player
 
 class Xyf(Player):
     # THIEF
+    boardsize = None
 
     def __init__(self, c):
         role = "Thief"
         super().__init__(role, c)
         self.name = self.__class__.__name__
 
-    def print_board(self,board):
-        boardstr = "  "
 
-        boardstr += "".join(["{:2}".format(e) for e in range(0, 20)])
-        boardstr += "\n"
-        for y in range(0, len(board)):
-            boardstr += "{:2} ".format(y)
-            for x in range(0, len(board[0])):
-                boardstr += board[x][y] + " "
-            boardstr += "\n"
-        print(boardstr)
     def get_neighbors(self, board, x, y):
         # Return 0-4: 0-Up, 1-Right, 2-Down, 3-Left
         neighbors = [None for e in range(4)]
@@ -57,7 +48,7 @@ class Xyf(Player):
         "down": 2,
         "left": 3
     }
-
+    sdirections = ["up", "right", "down", "left", "spell"]
     def getMove(self, board, x, y, movesize):
         self.x = x  # YOUR X
         self.y = y  # YOUR Y
@@ -68,6 +59,9 @@ class Xyf(Player):
         #
         # EDIT DOWN
         #
+        if self.boardsize is None:
+            self.boardsize = len(board)
+
         # print("+"*50)
         distance_to_enemy = abs(self.enemy_stats['x'] - self.x) + abs(self.enemy_stats['y'] - self.y)
         if distance_to_enemy >= movesize:
@@ -83,7 +77,7 @@ class Xyf(Player):
         # print(f"I am at {x},{y}")
         if x < ex:
             # print(f"right")
-            if x + chosen_move_size <= 19:
+            if x + chosen_move_size <= self.boardsize-1:
                 move_possible.append("right")
         if x > ex:
             # print(f"left")
@@ -92,7 +86,7 @@ class Xyf(Player):
 
         if y < ey:
             # print(f"down")
-            if y + chosen_move_size <=19:
+            if y + chosen_move_size <=self.boardsize-1:
 
                 move_possible.append("down")
         if y > ey:
@@ -117,15 +111,8 @@ class Xyf(Player):
         elif move_direction == 3:
             futurex = x - chosen_move_size
         # print(f"future is ({futurex},{futurey})")
-        try:
-            future_neighbors = self.get_neighbors(board,futurex, futurey)
-        except:
-            sys.exit()
+        future_neighbors = self.get_neighbors(board,futurex, futurey)
 
-        for i in range(len(future_neighbors)):
-            if future_neighbors[i] is not None:
-                if future_neighbors[i].c == self.enemy:
-                    attack_direction = i
 
         neighbors = self.get_neighbors(board, x, y)
         for i in range(len(neighbors)):
@@ -133,8 +120,25 @@ class Xyf(Player):
                 if neighbors[i].c == self.enemy:
                     # my enemy is standing next to me? Still?
                     chosen_move_size = 0
-                    attack_direction = i
-        # print(f"==={chosen_move_size} {movesize}")
+                    break
+        if x + 1 == ex:
+            # print("attack right")
+            attack_direction = 1
+        elif x - 1 == ex:
+            # print("attack left")
+
+            attack_direction = 3
+        elif y + 1 == ey:
+            # print("attack down")
+
+            attack_direction = 2
+        else:
+            # print("attack up")
+
+            attack_direction = 0
+
+        print(f"{self.name} {self.me}\n \tmoving {chosen_move_size} towards {move_direction} {self.sdirections[move_direction]}\n"
+              f"\tattacking {attack_direction} {self.sdirections[attack_direction]}")
         if 0 <= chosen_move_size <= movesize:
             # print("yes")
             return move_direction, attack_direction, chosen_move_size

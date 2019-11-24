@@ -2,6 +2,8 @@ import random
 from players.player import Player
 from players.Xyf import Xyf
 from players.RShields import Rshields
+from players.Timekeeper import Timekeeper
+
 
 class Fight(object):
     board = None
@@ -11,6 +13,7 @@ class Fight(object):
     healths = None
     manas = None
     moves_index = None
+    turns = 0
     roles = {
         # "CLASS":{
         #   "move_size": the MAX spaces you can move,
@@ -63,11 +66,14 @@ class Fight(object):
         self.__setup(size)
 
     def __setup(self, size):
+        # print("setup")
         coin_flip = random.randint(1, 2)
         self.next_player_turn = coin_flip
         self.board = self.__build_board(size)
 
     def __build_board(self, size):
+        # print("build board")
+
         self.board_size = size
         return [["."] * size for i in range(size)]
 
@@ -78,7 +84,8 @@ class Fight(object):
             raise AttributeError("Board is not yet made")
 
     def print_board(self):
-        boardstr = "  "
+        boardstr = self.statgame()
+        boardstr += "\n  "
 
         boardstr += "".join(["{:2}".format(e) for e in range(0, 20)])
         boardstr += "\n"
@@ -90,8 +97,8 @@ class Fight(object):
         print(boardstr)
 
     def add_players(self, players):
-        players[0].x, players[0].y = 0, 0
-        players[1].x, players[1].y = 19, 19
+        players[0].x, players[0].y = 16, 4
+        players[1].x, players[1].y = 2, 4
         newplayers = [" "]
         newhealths = [" "]
         newmanas = [" "]
@@ -101,7 +108,10 @@ class Fight(object):
         for player in players[0:]:
             newplayers.append(player)
             newhealths.append(self.roles[player.role]["health"])
+            player.health = self.roles[player.role]["health"]
             newmanas.append(self.roles[player.role]["mana"])
+            player.mana = self.roles[player.role]["mana"]
+
             self.set_space(player.x, player.y, player.me)
             newmoves_index.append(random.randint(0, len(self.roles[player.role]["move_size"]) - 1))
             i += 1
@@ -109,6 +119,19 @@ class Fight(object):
         self.healths = newhealths
         self.manas = newmanas
         self.moves_index = newmoves_index
+        self.update_players()
+
+    def statgame(self):
+        return f"{str(self.players[1])} {str(self.players[2])}"
+
+    def update_players(self):
+        p1 = self.players[1]
+        p2 = self.players[2]
+        for i in range(1, 3):
+            self.players[i].health = self.healths[i]
+            self.players[i].mana = self.manas[i]
+        p1.update_stats(p1.to_dict(), p2.to_dict())
+        p2.update_stats(p2.to_dict(), p1.to_dict())
 
     def fight(self):
         # print(self.players)
@@ -116,15 +139,12 @@ class Fight(object):
 
         p1 = self.players[1]
         p2 = self.players[2]
+        self.turns = 0
 
         while self.healths[1] > 0 and self.healths[2] > 0:
-            for i in range(1, 3):
-                self.players[i].health = self.healths[i]
-                self.players[i].mana = self.manas[i]
-            p1.update_stats(p1.to_dict(), p2.to_dict())
-            p2.update_stats(p2.to_dict(), p1.to_dict())
-            # print(f"nextplayerturn{self.next_player_turn}")
 
+            self.turns += 1
+            self.update_players()
             if self.next_player_turn == 1:
                 # p1 move
                 self.makeMove(p1, 1)
@@ -133,18 +153,13 @@ class Fight(object):
                 # p2 move
                 self.makeMove(p2, 2)
                 self.next_player_turn -= 1
-            for i in range(1, 3):
-                self.players[i].health = self.healths[i]
-                self.players[i].mana = self.manas[i]
-            p1.update_stats(p1.to_dict(), p2.to_dict())
-            p2.update_stats(p2.to_dict(), p1.to_dict())
-            # self.print_board()
+            self.update_players()
         if self.healths[1] <= 0:
-            return 2
+            return 2, self.turns
         else:
-            return 1
+            return 1, self.turns
 
-    def makeMove(self, player: Player, index):
+    def makeMove(self, player: Player, index, move, attack, movesize):
         #
         # SETUP
         #
@@ -168,35 +183,40 @@ class Fight(object):
         self.moves_index[me] = (self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
-        move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
+        # move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
         if 0 > movesize > allowable_size:
             self.healths[me] = 0
             # print("Player {} decided to cheat. They lose.")
         #
         # MOVEMENT
         #
-
+        # Moves: 0-Up, 1-Right, 2-Down, 3-Left
         if move == 0:
+            print("move up")
+
             # up
             newx = currx
             newy = curry - movesize
         elif move == 1:
+            print("move right")
+
             # right
             newx = currx + movesize
             newy = curry
         elif move == 2:
+            print("move down")
+
             # down
             newx = currx
             newy = curry + movesize
         elif move == 3:
+            print("move left")
+
 
             # left
             newx = currx - movesize
             newy = curry
             # print("moving left")
-        elif move == -1:
-            newx = currx
-            newy = curry
         else:
             newx = currx
             newy = curry
@@ -227,44 +247,57 @@ class Fight(object):
         #
         # ATTACK
         #
-
         attack_size = self.roles[player.role]["dmg_range"]
         skill = False
-        tarx = newx
-        tary = newy
         targets = []
 
         if attack == 0:
             # up
-            tary = newy - attack_size
-            if tary < 0 :
-                tary = 0
-            # print(f"targeting from ({newx},{newy}) to ({tarx},{tary})")
-            for i in range(tary,newy):
+
+            print("attack up")
+
+            i = newy
+            while len(targets) < attack_size:
+                i-= 1
+                if i < 0:
+                    break
+                print(f"adding ({newx},{i}) {self.board[newx][i]}")
                 targets.append(self.board[newx][i])
+
 
         elif attack == 1:
             # right
-            tarx = newx + attack_size
-            if tarx > self.board_size-1:
-                tarx = self.board_size-1
-            # print(f"new:{newx}, tarx:{tarx} newy:{newy}")
-            for i in range(newx,tarx):
+            print("attack right")
+            i = newx
+            while len(targets) < attack_size:
+                i += 1
+                if i > self.board_size-1:
+                    break
+                print(f"adding ({i},{newy}) {self.board[i][newy]}")
                 targets.append(self.board[i][newy])
 
         elif attack == 2:
-            # down
-            tary = newy + attack_size
-            if tary > self.board_size-1:
-                tary = self.board_size-1
-            for i in range(newy,tary):
+            print("attack down")
+
+            # DOWN
+            # print(f"size {attack_size}")
+            i = newy
+            while len(targets) < attack_size:
+                i += 1
+                if i > self.board_size-1:
+                    break
+                print(f"adding ({newx},{i}) {self.board[newx][i]}")
                 targets.append(self.board[newx][i])
         elif attack == 3:
             # left
-            tarx = newx - attack_size
-            if tarx < 0 :
-                tarx = 0
-            for i in range(tarx,newx):
+            print("attack left")
+
+            i = newx
+            while len(targets) < attack_size:
+                i -= 1
+                if i < 0:
+                    break
+                print(f"adding ({i},{newy}) {self.board[i][newy]}")
                 targets.append(self.board[i][newy])
         elif attack == 4:
             #
@@ -274,15 +307,19 @@ class Fight(object):
 
         if not skill:
             # print("Using attack")
-            # print(enemy.me,targets)
+            print(f"me{me}")
+            print(f"enemy{enemy}")
+            print(self.players[enemy].me,targets)
+
             if self.players[enemy].me in targets:
-                # print("hit")
+                print("hit")
                 min, max = self.roles[player.role]['dmg']
                 dmg = random.randint(min, max)
-                # print(self.healths)
+                print(self.healths)
                 self.healths[enemy] -= dmg
+                print(self.healths)
 
-                # print(f"Player{enemy} hit for {dmg}")
+                # print(f"Player{enemy} got hit for {dmg}")
                 # print(self.healths)
         else:
             if self.manas[me] is not None:
@@ -305,22 +342,42 @@ class Fight(object):
                     self.manas[me] -= 50
         return
 
+    def set_player_location(self,player,x,y):
+        self.board[player.x][player.y] = "."
+        player.x = x
+        player.y = y
+        self.board[player.x][player.y] = player.me
+
 
 if __name__ == "__main__":
+    # wins = [0, 0]
+    # games = 1
+    # while games > 0:
+    #     # print(f"games: {games}")
+    #     f = Fight(20)
+    #     players = [
+    #         Timekeeper("1"),
+    #         Xyf("2")
+    #     ]
+    #
+    #     f.add_players(players)
+    #     # f.print_board()
+    #     winner = f.fight()
+    #     print(f"player {winner[0]} wins!")
+    #     print(f"game: {games} in turns: {winner[1]}")
+    #     wins[winner[0] - 1] += 1
+    #     games -= 1
+    # print(wins)
+    f = Fight(20)
 
-    wins = [0,0]
-    games = 1000
-    while games >0:
-        # print(f"games: {games}")
-        f = Fight(20)
-        players = [
-            Xyf("1"),
-            Rshields("2")
-        ]
+    p1 = Timekeeper("1")
+    p2 = Xyf("2")
+    f.add_players([p1,p2])
+    f.print_board()
+    # f.makeMove(players[1], 2, 2, 2, 1)
+    f.set_player_location(p1,4,6)
+    f.set_player_location(p2,4,4)
+    f.print_board()
 
-        f.add_players(players)
-        # f.print_board()
-        games -= 1
-        winner = f.fight() -1
-        wins[winner] += 1
-    print(wins)
+    p1.getMove(f.board,p1.x,p1.y,1)
+    # f.print_board()

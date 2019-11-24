@@ -51,4 +51,21 @@ class Player(object):
         # Fight keeps track of both players health and mana independently. This is for YOU.
         # What I'm saying is, don't try to cheat
         self.mana = me['mana']
-        self.health = me['mana']
+        # print(me['mana'])
+        self.health = me['health']
+
+    def print_board(self,board):
+        boardstr = "  "
+
+        boardstr += "".join(["{:2}".format(e) for e in range(0, self.boardsize)])
+        boardstr += "\n"
+
+        for y in range(0, len(board)):
+            boardstr += "{:2} ".format(y)
+            for x in range(0, len(board[0])):
+                boardstr += board[x][y] + " "
+            boardstr += "\n"
+        print(boardstr)
+
+    def __str__(self):
+        return f"{self.me} ({self.x},{self.y}) h:{self.health} m:{self.mana}"
