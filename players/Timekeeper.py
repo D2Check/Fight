@@ -16,7 +16,8 @@ class Timekeeper(Player):
     sdirections = ["up", "right", "down", "left", "spell"]
 
     def __init__(self, c):
-        role = "Mage"  # You can replace this with Warrior or Thief or Mage or Monk
+        role = "Mage"
+        # print(f"Timekeeper {c}")
         super().__init__(role, c)
         self.name = self.__class__.__name__
 

@@ -24,10 +24,12 @@ def getplayers(tup):
             to_ret.append(Rshields(str(i)))
         if name == "Timekeeper":
             to_ret.append(Timekeeper(str(i)))
+        i+= 1
     return to_ret
 
 for i in list(perm):
-    games = 50
+    # print(f"Games between {i[0]} and {i[1]}")
+    games = 100
     while games > 0:
         # print(f"games: {games}")
         f = Fight(20)
@@ -37,6 +39,7 @@ for i in list(perm):
         f.fight()
         # print(f"player {winner[0]} wins!")
         # print(f"game: {games} in turns: {winner[1]}")
+        # print(f"{f.winner} wins!")
         players[f.winner] += 1
         games -= 1
 print(players)

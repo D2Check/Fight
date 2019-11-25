@@ -10,6 +10,7 @@ class Xyf(Player):
 
     def __init__(self, c):
         role = "Thief"
+        # print(f"Xyf {c}")
         super().__init__(role, c)
         self.name = self.__class__.__name__
 

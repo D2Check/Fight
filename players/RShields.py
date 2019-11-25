@@ -8,6 +8,9 @@ class Rshields(Player):
 
     def __init__(self, c):
         role = "Warrior"  # DECLARE YOUR ROLE HERE
+        # print(f"Rshields {c}")
+
+
         super().__init__(role, c)
         self.name = self.__class__.__name__
 
