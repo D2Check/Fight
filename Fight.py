@@ -347,6 +347,7 @@ class Fight(object):
         player.x = x
         player.y = y
         self.board[player.x][player.y] = player.me
+        self.update_players()
 
 
 if __name__ == "__main__":
@@ -356,15 +357,15 @@ if __name__ == "__main__":
         # print(f"games: {games}")
         f = Fight(20)
         players = [
-            Rshields("1"),
-            Xyf("2")
+            Xyf("1"),
+            Timekeeper("2")
         ]
 
         f.add_players(players)
         # f.print_board()
         winner = f.fight()
         # print(f"player {winner[0]} wins!")
-        # print(f"game: {games} in turns: {winner[1]}")
+        print(f"game: {games} in turns: {winner[1]}")
         wins[winner[0] - 1] += 1
         games -= 1
     print(wins)
@@ -374,8 +375,8 @@ if __name__ == "__main__":
     # p2 = Xyf("2")
     # f.add_players([p1,p2])
     # f.print_board()
-    # # f.makeMove(players[1], 2, 2, 2, 1)
-    # f.set_player_location(p1,4,6)
+    # f.makeMove(p1, 2, 2, 2, 1)
+    # f.set_player_location(p1,5,6)
     # f.set_player_location(p2,4,4)
     # f.print_board()
     #
