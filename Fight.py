@@ -4,6 +4,7 @@ from players.Xyf import Xyf
 from players.Pummel import Pummel
 from players.RShields import Rshields
 from players.Timekeeper import Timekeeper
+from players.Filth import Filth
 
 
 class Fight(object):
@@ -159,7 +160,6 @@ class Fight(object):
                 self.makeMove(p2, 2)
                 self.next_player_turn -= 1
             self.update_players()
-
         if self.healths[1] <= 0:
             self.winner = self.players[2].name
             return 2, self.turns
@@ -362,13 +362,13 @@ class Fight(object):
 
 if __name__ == "__main__":
     wins = [0, 0]
-    games = 50
+    games = 1
     while games > 0:
         # print(f"games: {games}")
         f = Fight(20)
         players = [
-            Timekeeper("1"),
-            Pummel("2")
+            Filth("1"),
+            Timekeeper("2")
         ]
 
         f.add_players(players)
