@@ -7,6 +7,7 @@ from players.Timekeeper import Timekeeper
 
 
 class Fight(object):
+    winner = None
     board = None
     board_size = None
     next_player_turn = None
@@ -160,8 +161,10 @@ class Fight(object):
             self.update_players()
 
         if self.healths[1] <= 0:
+            self.winner = self.players[2].name
             return 2, self.turns
         else:
+            self.winner = self.players[1].name
             return 1, self.turns
 
     def makeMove(self, player: Player, index):
