@@ -1,4 +1,5 @@
 from itertools import permutations
+import random
 from Fight import Fight
 from players.Xyf import Xyf
 from players.Pummel import Pummel
@@ -47,7 +48,7 @@ for i in list(perm):
     while games > 0:
         totalgames += 1
         # print(f"games: {games}")
-        f = Fight(20)
+        f = Fight(random.randint(15,35))
         p1, p2 = get_players(i)
         f.add_players([p1, p2])
         # f.print_board()

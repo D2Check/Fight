@@ -48,7 +48,7 @@ class Fight(object):
             "dmg_range": 2,
             "mana": 100,
             "health": 100,
-            "heal": 55# Your action will heal you
+            "heal": 55  # Your action will heal you
 
             # costs 50 mana
         },
@@ -65,29 +65,57 @@ class Fight(object):
 
     }
 
-    def __init__(self, size):
+    def __init__(self, size: int) -> None:
+        """
+        Board size in width and length.
+        - Calls __setup
+        :param size: int
+        """
+
         # print("Fight is made")
         self.__setup(size)
 
-    def __setup(self, size):
+    def __setup(self, size: int) -> None:
+        """
+        Decide who goes first
+        - Calls __build_board
+        :param size: int
+        """
         # print("setup")
         coin_flip = random.randint(1, 2)
         self.next_player_turn = coin_flip
         self.board = self.__build_board(size)
 
-    def __build_board(self, size):
+    def __build_board(self, size: int) -> list:
+        """
+        Build 2D list of size: size
+        :param size: int
+        :return: list of lists
+        """
         # print("build board")
 
         self.board_size = size
         return [["."] * size for i in range(size)]
 
-    def set_space(self, x, y, character_to_use):
+    def set_space(self, x: int, y: int, character_to_use: str) -> None:
+        """
+        Used in testing. Alters self.board directly.
+        :param x: x coord
+        :param y: y coord
+        :param character_to_use: what character to put there
+        :return: None
+        """
         if self.board is not None:
             self.board[x][y] = character_to_use
         else:
             raise AttributeError("Board is not yet made")
 
-    def print_board(self):
+    def print_board(self) -> None:
+        """
+        Print the board with stats about the players.
+        Used in testing
+        :return: None
+        """
         board_string = self.get_stats_of_game()
         board_string += "\n  "
 
@@ -100,16 +128,28 @@ class Fight(object):
             board_string += "\n"
         print(board_string)
 
-    def add_players(self, players):
-        players[0].x, players[0].y = 0, 0
-        players[1].x, players[1].y = 19, 19
+    def add_players(self, players_to_add: list) -> None:
+        """
+        Should contain 2 elements of the object Player or a class that inherits from player.
+        Sets in the initial position of players locations as well as their health and mana.
+        Updates the other player about the status of each player
+        - Calls update_players
+        :param players_to_add: list of players
+        :return: None
+        """
+        # STARTING LOCATIONS
+        players_to_add[0].x, players_to_add[0].y = 0, 0
+        players_to_add[1].x, players_to_add[1].y = self.board_size - 1, self.board_size - 1
+
+        # WHAT WILL BE USED TO KEEP Fight AUTHORITATIVE OVER PLAYER OBJECTS
         new_players = [" "]
         new_healths = [" "]
         new_mana = [" "]
         new_moves_index = [" "]
 
+        # SET PLAYERS INITIAL DETAILS
         i = 1
-        for player in players[0:]:
+        for player in players_to_add[0:]:
             new_players.append(player)
             new_healths.append(self.roles[player.role]["health"])
             player.health = self.roles[player.role]["health"]
@@ -117,27 +157,49 @@ class Fight(object):
             player.mana = self.roles[player.role]["mana"]
 
             self.set_space(player.x, player.y, player.me)
+
+            # TODO Allow Thief to choose when to move farther
             new_moves_index.append(random.randint(0, len(self.roles[player.role]["move_size"]) - 1))
             i += 1
+        # SET Fight's VARIABLES
         self.players = new_players
         self.healths = new_healths
         self.manas = new_mana
         self.moves_index = new_moves_index
+
+        # UPDATE THE PLAYERS OF EACH OTHERS STATS
         self.update_players()
 
-    def get_stats_of_game(self):
+    def get_stats_of_game(self) -> str:
+        """
+        String that contains stats on players
+        :return: str
+        """
         return f"{str(self.players[1])} {str(self.players[2])}"
 
     def update_players(self):
+        """
+        Update each player about themselves and the other player
+        :return:
+        """
         p1 = self.players[1]
         p2 = self.players[2]
         for i in range(1, 3):
+            # THIS ENSURES THAT FIGHT ALWAYS CONTROLS HEALTH / MANA
             self.players[i].health = self.healths[i]
             self.players[i].mana = self.manas[i]
         p1.update_stats(p1.to_dict(), p2.to_dict())
         p2.update_stats(p2.to_dict(), p1.to_dict())
 
     def fight(self):
+        """
+        Main game loop.
+        Set's self.winner upon finishing.
+        Calls
+        - update_players 2x
+        - make_move
+        :return (Player's character, Amount of turns):
+        """
         # print(self.players)
         assert len(self.players) == 3, "Players aren't the right size: {}".format(len(self.players))
 
@@ -145,6 +207,7 @@ class Fight(object):
         p2 = self.players[2]
         self.turns = 0
 
+        # MAIN GAME LOOP
         while self.healths[1] > 0 and self.healths[2] > 0:
 
             self.turns += 1
@@ -160,6 +223,7 @@ class Fight(object):
                 self.make_move(p2, 2)
                 self.next_player_turn -= 1
             self.update_players()
+        # SOMEONE HAS WON
         if self.healths[1] <= 0:
             self.winner = self.players[2].name
             return 2, self.turns
@@ -167,7 +231,7 @@ class Fight(object):
             self.winner = self.players[1].name
             return 1, self.turns
 
-    def make_move(self, player: Player, index):
+    def make_move(self, player: Player, index: int) -> None:
         #
         # SETUP
         #
@@ -194,7 +258,7 @@ class Fight(object):
             self.healths[me] = 0
             # print("Player {} decided to cheat. They lose.")
         #
-        # MOVEMENT
+        # MOVEMENT HAPPENS HERE
         #
         # Moves: 0-Up, 1-Right, 2-Down, 3-Left
         new_x = current_x
@@ -221,6 +285,7 @@ class Fight(object):
             new_x = current_x - movesize
             # print("moving left")
         else:
+            # YOUR MOVE WAS INVALID, YOU STAY STILL
             new_x = current_x
             new_y = current_y
 
@@ -228,19 +293,19 @@ class Fight(object):
                 new_x >= self.board_size or \
                 new_y < 0 or \
                 new_y >= self.board_size:
-            # Tried to move off the board
+            # TRIED TO MOVE OFF THE BOARD, STAY STILL
             # print(f"{index} invalid move off board")
             new_x = current_x
             new_y = current_y
 
         if self.board[new_x][new_y] == "1" or self.board[new_x][new_y] == "2":
-            # Tried to move onto a player
+            # TRIED TO MOVE ONTO A PLAYER, STAY STILL
             # print(f"{index} invalid move onto player")
 
             new_x = current_x
             new_y = current_y
 
-        # If the move is valid, mark that square as unoccupied
+        # MOVE IS VALID AND SQUARE IS UNOCCUPIED
         # print(f"curr:({currx},{curry}) new:({newx},{newy})")
         if current_x != new_x or new_y != current_y:
             # Valid move and some type of movement happened
@@ -250,7 +315,7 @@ class Fight(object):
         player.x, player.y = new_x, new_y
 
         #
-        # ATTACK
+        # ATTACK HAPPENS HERE
         #
         attack_size = self.roles[player.role]["dmg_range"]
         skill = False
@@ -268,7 +333,6 @@ class Fight(object):
                     break
                 # print(f"adding ({newx},{i}) {self.board[newx][i]}")
                 targets.append(self.board[new_x][i])
-
 
         elif attack == 1:
             # right
@@ -316,39 +380,53 @@ class Fight(object):
             # print(f"enemy{enemy}")
             # print(self.players[enemy].me,targets)
 
+            # IF THE ENEMY WAS ABLE TO HIT YOU
             if self.players[enemy].me in targets:
                 # print("hit")
+                # HOW MUCH DMG THE DO THIS TURN
                 min, max = self.roles[player.role]['dmg']
                 dmg = random.randint(min, max)
                 # print(self.healths)
+                # THIS PERFORMS THE ACTUAL DMG
                 self.healths[enemy] -= dmg
                 # print(self.healths)
 
                 # print(f"Player{enemy} got hit for {dmg}")
                 # print(self.healths)
         else:
-            if self.manas[me] is not None:
-                if self.manas[me] >= 50:
-                    if player.role == "Monk":
-                        # print("heal used")
-                        self.healths[me] += self.roles["Monk"]["heal"]
-                    elif player.role == "Mage":
-                        ex, ey = self.players[enemy].x, self.players[enemy].y
-                        eloc = [ex, ey]
-                        locations = [[0, 0], [0, 19], [19, 0], [19, 19]]
-                        if eloc in locations:
-                            # The other player put themselves in a corner we can't go there
-                            locations.remove(eloc)
-                        # BLINK
-                        self.board[new_x][new_y] = "."
-                        random.shuffle(locations)
-                        new_x, new_y = locations[random.randint(0, len(locations) - 1)]
-                        self.board[new_x][new_y] = str(index)
-                        player.x, player.y = new_x, new_y
-                    self.manas[me] -= 50
+            if self.manas[me] >= 50:
+                if player.role == "Monk":
+                    # print("heal used")
+                    # HEAL FOR HEAL AMOUNT
+                    self.healths[me] += self.roles["Monk"]["heal"]
+                elif player.role == "Mage":
+                    # THE MAGE TELEPORTS TO A RANDOM, UNOCCUPIED CORNER
+                    ex, ey = self.players[enemy].x, self.players[enemy].y
+                    enemy_location = [ex, ey]
+                    locations = [[0, 0], [0, self.board_size - 1], [self.board_size - 1, 0],
+                                 [self.board_size - 1, self.board_size - 1]]
+                    if enemy_location in locations:
+                        # The other player put themselves in a corner we can't go there
+                        locations.remove(enemy_location)
+                    # tele
+                    self.board[new_x][new_y] = "."
+                    random.shuffle(locations)
+                    new_x, new_y = locations[random.randint(0, len(locations) - 1)]
+                    self.board[new_x][new_y] = str(index)
+                    player.x, player.y = new_x, new_y
+                self.manas[me] -= 50
         return
 
-    def set_player_location(self, player, x, y):
+    def set_player_location(self, player: Player, x: int, y: int) -> None:
+        """
+        Used for testing
+        :param player: player object
+        :param x: x coord
+        :param y: y coord
+        :return: None
+        """
+        assert self.board is not None
+        assert player in self.players
         self.board[player.x][player.y] = "."
         player.x = x
         player.y = y
@@ -358,7 +436,7 @@ class Fight(object):
 
 if __name__ == "__main__":
     wins = [0, 0]
-    games = 1
+    games = 200
     while games > 0:
         # print(f"games: {games}")
         f = Fight(20)

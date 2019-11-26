@@ -55,17 +55,17 @@ class Player(object):
         self.health = me['health']
 
     def print_board(self,board):
-        boardstr = "  "
+        board_string = "  "
 
-        boardstr += "".join(["{:2}".format(e) for e in range(0, self.boardsize)])
-        boardstr += "\n"
+        board_string += "".join(["{:2}".format(e) for e in range(0, self.boardsize)])
+        board_string += "\n"
 
         for y in range(0, len(board)):
-            boardstr += "{:2} ".format(y)
+            board_string += "{:2} ".format(y)
             for x in range(0, len(board[0])):
-                boardstr += board[x][y] + " "
-            boardstr += "\n"
-        print(boardstr)
+                board_string += board[x][y] + " "
+            board_string += "\n"
+        print(board_string)
 
     def __str__(self):
         return f"{self.me} ({self.x},{self.y}) h:{self.health} m:{self.mana}"
