@@ -9,14 +9,14 @@ from players.Filth import Filth
 players = {
     "Xyf": 0,
     "Pummel": 0,
-    "Rshields": 0,
+    # "Rshields": 0,
     "Timekeeper": 0,
     "Filth": 0
 }
 perm = permutations([e for e in players.keys()], 2)
 
 
-def getplayers(tup):
+def get_players(tup):
     to_ret = []
     i = 1
     for name in tup:
@@ -43,12 +43,12 @@ for i in list(perm):
     else:
         if len(i[1]) > len(longestname):
             longestname = i[1]
-    games = 1000
+    games = 100
     while games > 0:
         totalgames += 1
         # print(f"games: {games}")
         f = Fight(20)
-        p1, p2 = getplayers(i)
+        p1, p2 = get_players(i)
         f.add_players([p1, p2])
         # f.print_board()
         f.fight()
@@ -60,4 +60,4 @@ for i in list(perm):
 
 for k,v in players.items():
     spaces = (len(longestname)-len(k)) * " "
-    print("{}{} {:4} {:6}".format(spaces,k,round(100*v/totalgames,2),v))
+    print("{}{} {:>4} {:6}".format(spaces,k,round(100*v/totalgames,2),v))

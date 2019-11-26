@@ -24,7 +24,7 @@ class Rshields(Player):
     #   if you are mage 4 moves you randomly (not near your enemy),
     #   if you are monk 4 gets health back
 
-    def getMove(self, board, x, y, movesize):
+    def get_move(self, board, x, y, movesize):
         self.x = x  # YOUR X
         self.y = y  # YOUR Y
         # movesize is how far you can move this turn. you can chose to move 0 >= choice <= movesize

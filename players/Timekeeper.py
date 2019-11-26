@@ -57,7 +57,7 @@ class Timekeeper(Player):
     # 0-3 ATTACKS in that direction,
     #   if you are mage 4 moves you randomly (not near your enemy),
     #   if you are monk 4 gets health back
-    def getMove(self, board, x, y, movesize):
+    def get_move(self, board, x, y, movesize):
         self.turns += 1
         self.turns_since_tele += 1
         self.x = x  # YOUR X

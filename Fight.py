@@ -81,51 +81,51 @@ class Fight(object):
         self.board_size = size
         return [["."] * size for i in range(size)]
 
-    def set_space(self, x, y, c):
+    def set_space(self, x, y, character_to_use):
         if self.board is not None:
-            self.board[x][y] = c
+            self.board[x][y] = character_to_use
         else:
             raise AttributeError("Board is not yet made")
 
     def print_board(self):
-        boardstr = self.statgame()
-        boardstr += "\n  "
+        board_string = self.get_stats_of_game()
+        board_string += "\n  "
 
-        boardstr += "".join(["{:2}".format(e) for e in range(0, 20)])
-        boardstr += "\n"
+        board_string += "".join(["{:2}".format(e) for e in range(0, 20)])
+        board_string += "\n"
         for y in range(0, self.board_size):
-            boardstr += "{:2} ".format(y)
+            board_string += "{:2} ".format(y)
             for x in range(0, self.board_size):
-                boardstr += self.board[x][y] + " "
-            boardstr += "\n"
-        print(boardstr)
+                board_string += self.board[x][y] + " "
+            board_string += "\n"
+        print(board_string)
 
     def add_players(self, players):
         players[0].x, players[0].y = 0, 0
         players[1].x, players[1].y = 19, 19
-        newplayers = [" "]
-        newhealths = [" "]
-        newmanas = [" "]
-        newmoves_index = [" "]
+        new_players = [" "]
+        new_healths = [" "]
+        new_mana = [" "]
+        new_moves_index = [" "]
 
         i = 1
         for player in players[0:]:
-            newplayers.append(player)
-            newhealths.append(self.roles[player.role]["health"])
+            new_players.append(player)
+            new_healths.append(self.roles[player.role]["health"])
             player.health = self.roles[player.role]["health"]
-            newmanas.append(self.roles[player.role]["mana"])
+            new_mana.append(self.roles[player.role]["mana"])
             player.mana = self.roles[player.role]["mana"]
 
             self.set_space(player.x, player.y, player.me)
-            newmoves_index.append(random.randint(0, len(self.roles[player.role]["move_size"]) - 1))
+            new_moves_index.append(random.randint(0, len(self.roles[player.role]["move_size"]) - 1))
             i += 1
-        self.players = newplayers
-        self.healths = newhealths
-        self.manas = newmanas
-        self.moves_index = newmoves_index
+        self.players = new_players
+        self.healths = new_healths
+        self.manas = new_mana
+        self.moves_index = new_moves_index
         self.update_players()
 
-    def statgame(self):
+    def get_stats_of_game(self):
         return f"{str(self.players[1])} {str(self.players[2])}"
 
     def update_players(self):
@@ -152,12 +152,12 @@ class Fight(object):
             if self.next_player_turn == 1:
                 # p1 move
                 # self.print_board()
-                self.makeMove(p1, 1)
+                self.make_move(p1, 1)
                 self.next_player_turn += 1
             else:
                 # p2 move
                 # self.print_board()
-                self.makeMove(p2, 2)
+                self.make_move(p2, 2)
                 self.next_player_turn -= 1
             self.update_players()
         if self.healths[1] <= 0:
@@ -167,15 +167,13 @@ class Fight(object):
             self.winner = self.players[1].name
             return 1, self.turns
 
-    def makeMove(self, player: Player, index):
+    def make_move(self, player: Player, index):
         #
         # SETUP
         #
-        newx = None
-        newy = None
-        currx = player.x
-        curry = player.y
-        tarx, tary = None, None
+        current_x = player.x
+        current_y = player.y
+        target_x, target_y = None, None
         me = None
         enemy = None
         if index == 1:
@@ -191,7 +189,7 @@ class Fight(object):
         self.moves_index[me] = (self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
-        move, attack, movesize = player.getMove(tempboard, player.x, player.y, allowable_size)
+        move, attack, movesize = player.get_move(tempboard, player.x, player.y, allowable_size)
         if 0 > movesize > allowable_size:
             self.healths[me] = 0
             # print("Player {} decided to cheat. They lose.")
@@ -199,59 +197,57 @@ class Fight(object):
         # MOVEMENT
         #
         # Moves: 0-Up, 1-Right, 2-Down, 3-Left
+        new_x = current_x
+        new_y = current_y
         if move == 0:
             # print(f"{index} move up")
 
             # up
-            newx = currx
-            newy = curry - movesize
+            new_y = current_y - movesize
         elif move == 1:
             # print(f"{index} move right")
 
             # right
-            newx = currx + movesize
-            newy = curry
+            new_x = current_x + movesize
         elif move == 2:
             # print(f"{index} move down")
 
             # down
-            newx = currx
-            newy = curry + movesize
+            new_y = current_y + movesize
         elif move == 3:
             # print(f"{index} move left")
 
             # left
-            newx = currx - movesize
-            newy = curry
+            new_x = current_x - movesize
             # print("moving left")
         else:
-            newx = currx
-            newy = curry
+            new_x = current_x
+            new_y = current_y
 
-        if newx < 0 or \
-                newx >= self.board_size or \
-                newy < 0 or \
-                newy >= self.board_size:
+        if new_x < 0 or \
+                new_x >= self.board_size or \
+                new_y < 0 or \
+                new_y >= self.board_size:
             # Tried to move off the board
             # print(f"{index} invalid move off board")
-            newx = currx
-            newy = curry
+            new_x = current_x
+            new_y = current_y
 
-        if self.board[newx][newy] == "1" or self.board[newx][newy] == "2":
+        if self.board[new_x][new_y] == "1" or self.board[new_x][new_y] == "2":
             # Tried to move onto a player
             # print(f"{index} invalid move onto player")
 
-            newx = currx
-            newy = curry
+            new_x = current_x
+            new_y = current_y
 
         # If the move is valid, mark that square as unoccupied
         # print(f"curr:({currx},{curry}) new:({newx},{newy})")
-        if currx != newx or newy != curry:
+        if current_x != new_x or new_y != current_y:
             # Valid move and some type of movement happened
             # print(f"({currx},{curry}) set to .")
-            self.board[currx][curry] = "."
-        self.board[newx][newy] = str(index)
-        player.x, player.y = newx, newy
+            self.board[current_x][current_y] = "."
+        self.board[new_x][new_y] = str(index)
+        player.x, player.y = new_x, new_y
 
         #
         # ATTACK
@@ -265,49 +261,49 @@ class Fight(object):
 
             # print("attack up")
 
-            i = newy
+            i = new_y
             while len(targets) < attack_size:
                 i -= 1
                 if i < 0:
                     break
                 # print(f"adding ({newx},{i}) {self.board[newx][i]}")
-                targets.append(self.board[newx][i])
+                targets.append(self.board[new_x][i])
 
 
         elif attack == 1:
             # right
             # print("attack right")
-            i = newx
+            i = new_x
             while len(targets) < attack_size:
                 i += 1
                 if i > self.board_size - 1:
                     break
                 # print(f"adding ({i},{newy}) {self.board[i][newy]}")
-                targets.append(self.board[i][newy])
+                targets.append(self.board[i][new_y])
 
         elif attack == 2:
             # print("attack down")
 
             # DOWN
             # print(f"size {attack_size}")
-            i = newy
+            i = new_y
             while len(targets) < attack_size:
                 i += 1
                 if i > self.board_size - 1:
                     break
                 # print(f"adding ({newx},{i}) {self.board[newx][i]}")
-                targets.append(self.board[newx][i])
+                targets.append(self.board[new_x][i])
         elif attack == 3:
             # left
             # print("attack left")
 
-            i = newx
+            i = new_x
             while len(targets) < attack_size:
                 i -= 1
                 if i < 0:
                     break
                 # print(f"adding ({i},{newy}) {self.board[i][newy]}")
-                targets.append(self.board[i][newy])
+                targets.append(self.board[i][new_y])
         elif attack == 4:
             #
             # THIS IS A SPECIAL CASE DO NOT TARGET
@@ -344,11 +340,11 @@ class Fight(object):
                             # The other player put themselves in a corner we can't go there
                             locations.remove(eloc)
                         # BLINK
-                        self.board[newx][newy] = "."
+                        self.board[new_x][new_y] = "."
                         random.shuffle(locations)
-                        newx, newy = locations[random.randint(0, len(locations) - 1)]
-                        self.board[newx][newy] = str(index)
-                        player.x, player.y = newx, newy
+                        new_x, new_y = locations[random.randint(0, len(locations) - 1)]
+                        self.board[new_x][new_y] = str(index)
+                        player.x, player.y = new_x, new_y
                     self.manas[me] -= 50
         return
 

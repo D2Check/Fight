@@ -51,7 +51,7 @@ class Pummel(Player):
         "left": 3
     }
     sdirections = ["up", "right", "down", "left", "spell"]
-    def getMove(self, board, x, y, movesize):
+    def get_move(self, board, x, y, movesize):
         self.x = x  # YOUR X
         self.y = y  # YOUR Y
         # movesize is how far you can move this turn. you can chose to move 0 >= choice <= movesize

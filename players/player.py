@@ -30,7 +30,7 @@ class Player(object):
     def get_char(self):
         return self.me
 
-    def getMove(self, board, x, y, movesize):
+    def get_move(self, board, x, y, movesize):
         self.x = x
         self.y = y
         # attack and move randomly. This will work, right?
