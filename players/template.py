@@ -24,7 +24,7 @@ class YOURNAMEHERE(Player):
     def get_move(self, board, x, y, movesize):
         self.x = x # YOUR X
         self.y = y # YOUR Y
-        # movesize is how far you can move this turn. you can chose to move 0 >= choice <= movesize
+        # movesize is how far you can move this turn. you can chose to move 0 <= choice <= movesize
         move_direction = 0
         attack_direction = 0
         chosen_move_size = 0
