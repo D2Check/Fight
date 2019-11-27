@@ -3,7 +3,7 @@ import random
 from Fight import Fight, import_player
 import players
 
-games_per_matchup = 10
+games_per_matchup = 5000
 
 
 player_classes = {module_name: import_player(
@@ -24,7 +24,7 @@ def get_players(tup):
 longestname = ""
 totalgames = 0
 for i, game_players in enumerate(matchups):
-    print(f"Games between {game_players[0]} and {game_players[1]}")
+    # print(f"Games between {game_players[0]} and {game_players[1]}")
     if len(game_players[0]) >= len(game_players[1]):
         if len(game_players[0]) > len(longestname):
             longestname = game_players[0]
@@ -39,11 +39,9 @@ for i, game_players in enumerate(matchups):
         p1, p2 = get_players(game_players)
         f.add_players([p1, p2])
         # f.print_board()
-        f.fight()
-        # print(f"player {winner[0]} wins!")
-        # print(f"game: {games} in turns: {winner[1]}")
-        # print(f"{f.winner} wins!")
-        players[f.winner] += 1
+        winner = f.fight()
+        if winner is not None:
+            players[f.winner] += 1
         games += 1
         print(
             f'{games+games_per_matchup*i}/{games_per_matchup*len(matchups)} games played '

@@ -210,6 +210,7 @@ class Fight(object):
         self.turns = 0
 
         # MAIN GAME LOOP
+        timeout = False
         while self.healths[1] > 0 and self.healths[2] > 0:
 
             self.turns += 1
@@ -225,7 +226,14 @@ class Fight(object):
                 self.make_move(p2, 2)
                 self.next_player_turn -= 1
             self.update_players()
+            if self.turns == 3500: # each player gets half of these turns to kill the other player.
+                # There's a long explanation for how I ended up at 3500 turns but, long story short,
+                # if you move literally randomly and just "aim" intelligently, the
+                timeout = True
+                break
         # SOMEONE HAS WON
+        if timeout:
+            return None
         if self.healths[1] <= 0:
             self.winner = self.players[2].name
             return 2, self.turns
@@ -456,7 +464,8 @@ if __name__ == "__main__":
         winner = f.fight()
         # print(f"player {winner[0]} wins!")
         # print(f"game: {games} in turns: {winner[1]}")
-        wins[winner[0] - 1] += 1
+        if winner is not None:
+            wins[winner[0] - 1] += 1
         games -= 1
     print(wins)
 
