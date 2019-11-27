@@ -68,13 +68,13 @@ class Pummel(Player):
         newx = x
         newy = y
         if move_direction == 0:
-            newy = y -1
+            newy = y - 1
         elif move_direction == 1:
-            newx = x +1
+            newx = x + 1
         elif move_direction == 2:
-            newy = y+1
+            newy = y + 1
         elif move_direction == 3:
-            newx = x-1
+            newx = x - 1
 
         if board[newx][newy] == self.enemy:
             chosen_move_size = 0
