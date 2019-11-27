@@ -1,7 +1,7 @@
 import random
 import math
 import sys
-from players.player import Player
+from players.Player import Player
 
 
 class Xyf(Player):

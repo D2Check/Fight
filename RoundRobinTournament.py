@@ -1,39 +1,25 @@
 from itertools import permutations
 import random
 from Fight import Fight
-from players.Xyf import Xyf
-from players.Pummel import Pummel
-from players.RShields import Rshields
-from players.Timekeeper import Timekeeper
-from players.Filth import Filth
+import players
 
-players = {
-    "Xyf": 0,
-    "Pummel": 0,
-    # "Rshields": 0,
-    "Timekeeper": 0,
-    "Filth": 0
-}
+player_classes = {}
+for module_name in players.__all__:
+    player_classes[module_name] = getattr(__import__(
+        'players.' + module_name, fromlist=['']), module_name)
+print(player_classes)
+
+players = {name: 0 for name in players.__all__}
 perm = permutations([e for e in players.keys()], 2)
 
 
 def get_players(tup):
     to_ret = []
-    i = 1
-    for name in tup:
-        if name == "Filth":
-            to_ret.append(Filth(str(i)))
-        if name == "Xyf":
-            to_ret.append(Xyf(str(i)))
-        if name == "Pummel":
-            to_ret.append(Pummel(str(i)))
-        if name == "Rshields":
-            to_ret.append(Rshields(str(i)))
-        if name == "Timekeeper":
-            to_ret.append(Timekeeper(str(i)))
-
-        i += 1
+    for i, name in enumerate(tup):
+        to_ret.append(player_classes[name](str(i + 1)))
     return to_ret
+
+
 longestname = ""
 totalgames = 0
 for i in list(perm):
@@ -48,7 +34,7 @@ for i in list(perm):
     while games > 0:
         totalgames += 1
         # print(f"games: {games}")
-        f = Fight(random.randint(15,35))
+        f = Fight(random.randint(15, 35))
         p1, p2 = get_players(i)
         f.add_players([p1, p2])
         # f.print_board()
@@ -59,6 +45,6 @@ for i in list(perm):
         players[f.winner] += 1
         games -= 1
 
-for k,v in players.items():
-    spaces = (len(longestname)-len(k)) * " "
-    print("{}{} {:>4} {:6}".format(spaces,k,round(100*v/totalgames,2),v))
+for k, v in players.items():
+    spaces = (len(longestname) - len(k)) * " "
+    print("{}{} {:>4} {:6}".format(spaces, k, round(100 * v / totalgames, 2), v))

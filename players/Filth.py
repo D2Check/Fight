@@ -1,4 +1,4 @@
-from players.player import Player
+from players.Player import Player
 
 
 class Filth(Player):

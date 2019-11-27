@@ -1,7 +1,7 @@
 import random
 import math
 import sys
-from players.player import Player
+from players.Player import Player
 
 
 class Pummel(Player):
@@ -14,7 +14,6 @@ class Pummel(Player):
 
         super().__init__(role, c)
         self.name = self.__class__.__name__
-
 
     def get_neighbors(self, board, x, y):
         # Return 0-4: 0-Up, 1-Right, 2-Down, 3-Left
@@ -51,6 +50,7 @@ class Pummel(Player):
         "left": 3
     }
     sdirections = ["up", "right", "down", "left", "spell"]
+
     def get_move(self, board, x, y, movesize):
         self.x = x  # YOUR X
         self.y = y  # YOUR Y
@@ -65,13 +65,14 @@ class Pummel(Player):
             self.boardsize = len(board)
 
         # print("+"*50)
-        distance_to_enemy = abs(self.enemy_stats['x'] - self.x) + abs(self.enemy_stats['y'] - self.y)
+        distance_to_enemy = abs(
+            self.enemy_stats['x'] - self.x) + abs(self.enemy_stats['y'] - self.y)
         if distance_to_enemy >= movesize:
             chosen_move_size = movesize
         else:
             chosen_move_size = distance_to_enemy
         move_possible = []
-        ex, ey = self.enemy_stats['x'],self.enemy_stats['y']
+        ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
         # print(f"dist to e {distance_to_enemy}")
         if distance_to_enemy == 2:
             chosen_move_size = 1
@@ -79,16 +80,16 @@ class Pummel(Player):
         # print(f"I am at {x},{y}")
         if x < ex:
             # print(f"right")
-            if x + chosen_move_size <= self.boardsize-1:
+            if x + chosen_move_size <= self.boardsize - 1:
                 move_possible.append("right")
         if x > ex:
             # print(f"left")
-            if x - chosen_move_size >=0:
+            if x - chosen_move_size >= 0:
                 move_possible.append("left")
 
         if y < ey:
             # print(f"down")
-            if y + chosen_move_size <=self.boardsize-1:
+            if y + chosen_move_size <= self.boardsize - 1:
 
                 move_possible.append("down")
         if y > ey:
@@ -98,8 +99,8 @@ class Pummel(Player):
                 move_possible.append("up")
         # self.print_board(board)
 
-
-        move_direction = self.directions[move_possible[random.randint(0, len(move_possible)-1)]]
+        move_direction = self.directions[move_possible[random.randint(
+            0, len(move_possible) - 1)]]
 
         # print("move dir",move_direction)
         # print(f"Want to move {move_possible[move_direction]}")
@@ -113,8 +114,7 @@ class Pummel(Player):
         elif move_direction == 3:
             futurex = x - chosen_move_size
         # print(f"future is ({futurex},{futurey})")
-        future_neighbors = self.get_neighbors(board,futurex, futurey)
-
+        future_neighbors = self.get_neighbors(board, futurex, futurey)
 
         neighbors = self.get_neighbors(board, x, y)
         for i in range(len(neighbors)):
@@ -139,7 +139,7 @@ class Pummel(Player):
 
             attack_direction = 0
         if self.health <= 20 and self.mana >= 50:
-            attack_direction =4
+            attack_direction = 4
         # print(f"{self.name} {self.me}\n \tmoving {chosen_move_size} towards {move_direction} {self.sdirections[move_direction]}\n"
         #       f"\tattacking {attack_direction} {self.sdirections[attack_direction]}")
         if 0 <= chosen_move_size <= movesize:

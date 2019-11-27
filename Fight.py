@@ -1,11 +1,6 @@
 import random
-from players.player import Player
-from players.Xyf import Xyf
-from players.Pummel import Pummel
-from players.RShields import Rshields
-from players.Timekeeper import Timekeeper
-from players.Filth import Filth
-
+import players
+from players.Player import Player
 
 class Fight(object):
     winner = None
@@ -71,7 +66,7 @@ class Fight(object):
         - Calls __setup
         :param size: int
         """
-
+        print(size)
         # print("Fight is made")
         self.__setup(size)
 
@@ -435,7 +430,7 @@ class Fight(object):
 
 
 if __name__ == "__main__":
-    wins = [0, 0]
+    """ wins = [0, 0]
     games = 200
     while games > 0:
         # print(f"games: {games}")
@@ -452,7 +447,7 @@ if __name__ == "__main__":
         # print(f"game: {games} in turns: {winner[1]}")
         wins[winner[0] - 1] += 1
         games -= 1
-    print(wins)
+    print(wins) """
     # f = Fight(20)
     #
     # p1 = Timekeeper("1")

@@ -1,8 +1,8 @@
-from players.player import Player
+from players.Player import Player
 import random
 
 
-class Rshields(Player):
+class RShields(Player):
     # Feel free to add variables here.
     # You don't need to, it might be helpful
 
