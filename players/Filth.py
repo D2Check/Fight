@@ -31,25 +31,68 @@ class Filth(Player):
         ## YOUR CODE HERE
         ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
 
+        ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
+        # print(f"Filth Im at ({x},{y}) E at ({ex},{ey})")
         if y == ey:
+            # print("Filth move y=ey")
             if x < ex:
+                # print("Filth move right")
                 move_direction = 1
+            else:
+                # print("Filth move left")
+                move_direction = 3
+        elif x == ex:
+            # print("Filth move x=ex")
+            if y < ey:
+                # print("Filth move down")
+                move_direction = 2
+            else:
+                # print("Filth move up")
+                move_direction = 0
+        elif y > ey:
+            # print("Filth moving up")
+            move_direction = 0
+        elif ey > y:
+            # print("Filth moving down")
+            move_direction = 2
+
+        newx = x
+        newy = y
+        if move_direction == 0:
+            newy = y - movesize
+        elif move_direction == 1:
+            newx = x + movesize
+        elif move_direction == 2:
+            newy = y + movesize
+        elif move_direction == 3:
+            newx = x - movesize
+
+        if board[newx][newy] == self.enemy:
+            chosen_move_size = 0
+            newx = x
+            newy = y
+
+        if newy == ey:
+            # print("Filth attack y=ey")
+            if newx < ex:
+                # print("Filth attack right")
                 attack_direction = 1
             else:
-                move_direction = 3
+                # print("Filth move left")
                 attack_direction = 3
-        elif x == ex:
-            if y < ey:
-                move_direction = 2
+        elif newx == ex:
+            # print("Filth attack x=ex")
+            if newy < ey:
+                # print("Filth attack down")
                 attack_direction = 2
             else:
-                move_direction = 0
+                # print("Filth attack up")
                 attack_direction = 0
-        elif y > ey:
-            move_direction = 0
+        elif newy > ey:
+            # print("Filth attacking up")
             attack_direction = 0
-        elif ey > y:
-            move_direction = 2
+        elif ey > newy:
+            # print("Filth attacking down")
             attack_direction = 2
 
 

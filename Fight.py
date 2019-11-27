@@ -311,7 +311,7 @@ class Fight(object):
             new_y = current_y
 
         # MOVE IS VALID AND SQUARE IS UNOCCUPIED
-        # print(f"curr:({currx},{curry}) new:({newx},{newy})")
+        # print(f"curr:({current_x},{current_y}) new:({new_x},{new_y})")
         if current_x != new_x or new_y != current_y:
             # Valid move and some type of movement happened
             # print(f"({currx},{curry}) set to .")
@@ -329,7 +329,7 @@ class Fight(object):
         if attack == 0:
             # up
 
-            # print("attack up")
+            # print(f"{me} attack up")
 
             i = new_y
             while len(targets) < attack_size:
@@ -341,7 +341,7 @@ class Fight(object):
 
         elif attack == 1:
             # right
-            # print("attack right")
+            # print(f"{me} attack right")
             i = new_x
             while len(targets) < attack_size:
                 i += 1
@@ -351,7 +351,7 @@ class Fight(object):
                 targets.append(self.board[i][new_y])
 
         elif attack == 2:
-            # print("attack down")
+            # print(f"{me} attack down")
 
             # DOWN
             # print(f"size {attack_size}")
@@ -364,7 +364,7 @@ class Fight(object):
                 targets.append(self.board[new_x][i])
         elif attack == 3:
             # left
-            # print("attack left")
+            # print(f"{me} attack left")
 
             i = new_x
             while len(targets) < attack_size:
@@ -441,23 +441,22 @@ class Fight(object):
 
 
 if __name__ == "__main__":
-    # wins = [0, 0]
-    # games = 200
-    # while games > 0:
-    #     # print(f"games: {games}")
-    #     f = Fight(20)
-    #     players = [
-    #         Filth("1"),
-    #         Timekeeper("2")
-    #     ]
-    #
-    #     f.add_players(players)
-    #     # f.print_board()
-    #     winner = f.fight()
-    #     # print(f"player {winner[0]} wins!")
-    #     # print(f"game: {games} in turns: {winner[1]}")
-    #     wins[winner[0] - 1] += 1
-    #     games -= 1
-    # print(wins)
-    for k in import_player:
-        print(k)
+    wins = [0, 0]
+    games = 1
+    while games > 0:
+        # print(f"games: {games}")
+        f = Fight(20)
+        players = [
+            import_player("Timekeeper")("1"),
+            import_player("Pummel")("2")
+        ]
+
+        f.add_players(players)
+        # f.print_board()
+        winner = f.fight()
+        # print(f"player {winner[0]} wins!")
+        # print(f"game: {games} in turns: {winner[1]}")
+        wins[winner[0] - 1] += 1
+        games -= 1
+    print(wins)
+

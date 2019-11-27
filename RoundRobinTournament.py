@@ -3,7 +3,7 @@ import random
 from Fight import Fight, import_player
 import players
 
-games_per_matchup = 1000
+games_per_matchup = 10
 
 
 player_classes = {module_name: import_player(
@@ -24,7 +24,7 @@ def get_players(tup):
 longestname = ""
 totalgames = 0
 for i, game_players in enumerate(matchups):
-    # print(f"Games between {i[0]} and {i[1]}")
+    print(f"Games between {game_players[0]} and {game_players[1]}")
     if len(game_players[0]) >= len(game_players[1]):
         if len(game_players[0]) > len(longestname):
             longestname = game_players[0]

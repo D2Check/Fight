@@ -15,28 +15,6 @@ class Pummel(Player):
         super().__init__(role, c)
         self.name = self.__class__.__name__
 
-    def get_neighbors(self, board, x, y):
-        # Return 0-4: 0-Up, 1-Right, 2-Down, 3-Left
-        neighbors = [None for e in range(4)]
-        if x + 1 < 20:
-            # right
-            if board[x + 1][y] != self.enemy:
-                neighbors[1] = Tile(x + 1, y, board[x + 1][y])
-        if x - 1 >= 0:
-            # Left
-            if board[x - 1][y] != self.enemy:
-                neighbors[3] = Tile(x - 1, y, board[x - 1][y])
-        if y - 1 >= 0:
-            # up
-            if board[x][y - 1] != self.enemy:
-                neighbors[0] = Tile(x, y - 1, board[x][y - 1])
-
-        if y + 1 < 20:
-            # down
-            if board[x][y + 1] != self.enemy:
-                neighbors[2] = Tile(x, y + 1, board[x][y + 1])
-        return neighbors
-
     # OVERRIDE THIS in your class!
     # board - current state of the board
     # x,y - your current row and column on the board
@@ -63,26 +41,67 @@ class Pummel(Player):
         #
 
         ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
-
+        # print(f"Pummel Im at ({x},{y}) E at ({ex},{ey})")
         if y == ey:
+            # print("Pummel move y=ey")
             if x < ex:
+                # print("Pummel move right")
                 move_direction = 1
+            else:
+                # print("Pummel move left")
+                move_direction = 3
+        elif x == ex:
+            # print("Pummel move x=ex")
+            if y < ey:
+                # print("Pummel move down")
+                move_direction = 2
+            else:
+                # print("Pummel move up")
+                move_direction = 0
+        elif y > ey:
+            # print("Pummel moving up")
+            move_direction = 0
+        elif ey > y:
+            # print("Pummel moving down")
+            move_direction = 2
+
+        newx = x
+        newy = y
+        if move_direction == 0:
+            newy = y -1
+        elif move_direction == 1:
+            newx = x +1
+        elif move_direction == 2:
+            newy = y+1
+        elif move_direction == 3:
+            newx = x-1
+
+        if board[newx][newy] == self.enemy:
+            chosen_move_size = 0
+            newx = x
+            newy = y
+
+        if newy == ey:
+            # print("Pummel attack y=ey")
+            if newx < ex:
+                # print("Pummel attack right")
                 attack_direction = 1
             else:
-                move_direction = 3
+                # print("Pummel move left")
                 attack_direction = 3
-        elif x == ex:
-            if y < ey:
-                move_direction = 2
+        elif newx == ex:
+            # print("Pummel attack x=ex")
+            if newy < ey:
+                # print("Pummel attack down")
                 attack_direction = 2
             else:
-                move_direction = 0
+                # print("Pummel attack up")
                 attack_direction = 0
-        elif y > ey:
-            move_direction = 0
+        elif newy > ey:
+            # print("Pummel attacking up")
             attack_direction = 0
-        elif ey > y:
-            move_direction = 2
+        elif ey > newy:
+            # print("Pummel attacking down")
             attack_direction = 2
         if 0 <= chosen_move_size <= movesize:
             # print("yes")
