@@ -1,6 +1,11 @@
 import random
 import players
 from players.Player import Player
+import sys
+
+import_player = lambda name: getattr(
+    __import__('players.' + name, fromlist=['']), name)
+
 
 class Fight(object):
     winner = None
@@ -66,7 +71,6 @@ class Fight(object):
         - Calls __setup
         :param size: int
         """
-        print(size)
         # print("Fight is made")
         self.__setup(size)
 
@@ -134,7 +138,8 @@ class Fight(object):
         """
         # STARTING LOCATIONS
         players_to_add[0].x, players_to_add[0].y = 0, 0
-        players_to_add[1].x, players_to_add[1].y = self.board_size - 1, self.board_size - 1
+        players_to_add[1].x, players_to_add[1].y = self.board_size - \
+            1, self.board_size - 1
 
         # WHAT WILL BE USED TO KEEP Fight AUTHORITATIVE OVER PLAYER OBJECTS
         new_players = [" "]
@@ -154,7 +159,8 @@ class Fight(object):
             self.set_space(player.x, player.y, player.me)
 
             # TODO Allow Thief to choose when to move farther
-            new_moves_index.append(random.randint(0, len(self.roles[player.role]["move_size"]) - 1))
+            new_moves_index.append(random.randint(
+                0, len(self.roles[player.role]["move_size"]) - 1))
             i += 1
         # SET Fight's VARIABLES
         self.players = new_players
@@ -186,7 +192,7 @@ class Fight(object):
         p1.update_stats(p1.to_dict(), p2.to_dict())
         p2.update_stats(p2.to_dict(), p1.to_dict())
 
-    def fight(self):
+    def fight(self, print_board=False):
         """
         Main game loop.
         Set's self.winner upon finishing.
@@ -196,7 +202,8 @@ class Fight(object):
         :return (Player's character, Amount of turns):
         """
         # print(self.players)
-        assert len(self.players) == 3, "Players aren't the right size: {}".format(len(self.players))
+        assert len(self.players) == 3, "Players aren't the right size: {}".format(
+            len(self.players))
 
         p1 = self.players[1]
         p2 = self.players[2]
@@ -218,6 +225,8 @@ class Fight(object):
                 self.make_move(p2, 2)
                 self.next_player_turn -= 1
             self.update_players()
+            if print_board:
+                self.print_board()
         # SOMEONE HAS WON
         if self.healths[1] <= 0:
             self.winner = self.players[2].name
@@ -244,11 +253,14 @@ class Fight(object):
 
         # DATA TO SEND THE PLAYER
         tempboard = [row[:] for row in self.board]  # faster than deepcopy
-        allowable_size = self.roles[player.role]["move_size"][int(self.moves_index[me])]
-        self.moves_index[me] = (self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
+        allowable_size = self.roles[player.role]["move_size"][int(
+            self.moves_index[me])]
+        self.moves_index[me] = (
+            self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
-        move, attack, movesize = player.get_move(tempboard, player.x, player.y, allowable_size)
+        move, attack, movesize = player.get_move(
+            tempboard, player.x, player.y, allowable_size)
         if 0 > movesize > allowable_size:
             self.healths[me] = 0
             # print("Player {} decided to cheat. They lose.")
@@ -406,7 +418,8 @@ class Fight(object):
                     # tele
                     self.board[new_x][new_y] = "."
                     random.shuffle(locations)
-                    new_x, new_y = locations[random.randint(0, len(locations) - 1)]
+                    new_x, new_y = locations[random.randint(
+                        0, len(locations) - 1)]
                     self.board[new_x][new_y] = str(index)
                     player.x, player.y = new_x, new_y
                 self.manas[me] -= 50
@@ -430,34 +443,26 @@ class Fight(object):
 
 
 if __name__ == "__main__":
-    """ wins = [0, 0]
+    wins = [0, 0]
     games = 200
+    show: bool = False
+    if sys.argv[1] == "--show":
+        show = True
     while games > 0:
-        # print(f"games: {games}")
+        if show:
+            print(f"games: {games}")
+
         f = Fight(20)
         players = [
-            Filth("1"),
-            Timekeeper("2")
+            import_player(sys.argv[1 + show])('1'),
+            import_player(sys.argv[2 + show])('2')
         ]
 
         f.add_players(players)
-        # f.print_board()
-        winner = f.fight()
-        # print(f"player {winner[0]} wins!")
-        # print(f"game: {games} in turns: {winner[1]}")
+        winner = f.fight(print_board=show)
+        if show:
+            print(f"player {winner[0]} wins!")
+            print(f"game: {games} in turns: {winner[1]}")
         wins[winner[0] - 1] += 1
         games -= 1
-    print(wins) """
-    # f = Fight(20)
-    #
-    # p1 = Timekeeper("1")
-    # p2 = Rshields("2")
-    # f.add_players([p1,p2])
-    # f.print_board()
-    # f.makeMove(p1, 2, 2, 2, 1)
-    # f.set_player_location(p1,5,6)
-    # f.set_player_location(p2,4,4)
-    # f.print_board()
-    #
-    # p1.getMove(f.board,p1.x,p1.y,1)
-    # f.print_board()
+    print(wins)

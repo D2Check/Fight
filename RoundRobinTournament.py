@@ -1,13 +1,11 @@
 from itertools import permutations
 import random
-from Fight import Fight
+from Fight import Fight, import_player
 import players
 
-player_classes = {}
-for module_name in players.__all__:
-    player_classes[module_name] = getattr(__import__(
-        'players.' + module_name, fromlist=['']), module_name)
-print(player_classes)
+player_classes = {module_name: import_player(
+    module_name) for module_name in players.__all__}
+print(f'loaded {", ".join(player_classes)}')
 
 players = {name: 0 for name in players.__all__}
 perm = permutations([e for e in players.keys()], 2)
