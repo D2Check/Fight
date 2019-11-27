@@ -156,36 +156,36 @@ class Timekeeper(Player):
                         choice = 0
 
             # IM NOT IN A CORNER, RUN LIKE HELL
-            elif 0 <= x <= int(self.boardsize / 2) and 0 <= y <= int(self.boardsize / 2) - 1:
-                print("top left, move right or up")
-                # choice = 1
+            elif 0 <= x < int(self.boardsize / 2) and 0 <= y < int(self.boardsize / 2) - 1:
+                # print("top left, move right or up")
+                choice = 1
                 if y == ey and x + 1 == ex:
                     choice = 0
-            elif int(self.boardsize / 2) <= x <= self.boardsize - 1 and 0 <= y <= int(self.boardsize / 2) - 1:
-                print("top right, move down or right")
+            elif int(self.boardsize / 2) <= x <= self.boardsize - 1 and 0 <= y < int(self.boardsize / 2) - 1:
+                # print("top right, move down or right")
 
                 choice = 0
                 if y + 1 == ey and x == ex:
                     choice = 1
             elif int(self.boardsize / 2) <= x <= self.boardsize - 1 and int(
                     self.boardsize / 2) <= y <= self.boardsize - 1:
-                print("bottom right, move left or down")
+                # print("bottom right, move left or down")
                 choice = 3
 
                 if x - 1 == ex and y == ey:
                     choice = 2
             elif 0 <= x < int(self.boardsize / 2) and int(self.boardsize / 2) <= y <= self.boardsize - 1:
-                print("bottom left, move up or left")
+                # print("bottom left, move up or left")
 
                 choice = 0
                 if y - 1 == ey and x == ex:
                     choice = 3
             else:
                 pass
-                print(f"Something went wrong")
-                print(f"Im at ({x},{y})")
-                print(f"int(self.boardsize / 2) = {int(self.boardsize / 2)}")
-                print(f"self.boardsize-1 = {self.boardsize - 1}")
+                # print(f"Something went wrong")
+                # print(f"Im at ({x},{y})")
+                # print(f"int(self.boardsize / 2) = {int(self.boardsize / 2)}")
+                # print(f"self.boardsize-1 = {self.boardsize - 1}")
 
             if 9 <= x <= 10 and 9 <= y <= 10:
                 # IM IN THE CENTER OF THE MAP
