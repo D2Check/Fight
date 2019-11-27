@@ -441,21 +441,23 @@ class Fight(object):
 
 
 if __name__ == "__main__":
-    wins = [0, 0]
-    games = 200
-    while games > 0:
-        # print(f"games: {games}")
-        f = Fight(20)
-        players = [
-            Filth("1"),
-            Timekeeper("2")
-        ]
-
-        f.add_players(players)
-        # f.print_board()
-        winner = f.fight()
-        # print(f"player {winner[0]} wins!")
-        # print(f"game: {games} in turns: {winner[1]}")
-        wins[winner[0] - 1] += 1
-        games -= 1
-    print(wins)
+    # wins = [0, 0]
+    # games = 200
+    # while games > 0:
+    #     # print(f"games: {games}")
+    #     f = Fight(20)
+    #     players = [
+    #         Filth("1"),
+    #         Timekeeper("2")
+    #     ]
+    #
+    #     f.add_players(players)
+    #     # f.print_board()
+    #     winner = f.fight()
+    #     # print(f"player {winner[0]} wins!")
+    #     # print(f"game: {games} in turns: {winner[1]}")
+    #     wins[winner[0] - 1] += 1
+    #     games -= 1
+    # print(wins)
+    for k in import_player:
+        print(k)

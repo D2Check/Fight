@@ -54,124 +54,36 @@ class Pummel(Player):
     def get_move(self, board, x, y, movesize):
         self.x = x  # YOUR X
         self.y = y  # YOUR Y
-        # movesize is how far you can move this turn. you can chose to move 0 >= choice <= movesize
+        # movesize is how far you can move this turn. you can chose to move 0 <= choice <= movesize
         move_direction = 0
         attack_direction = 0
-        chosen_move_size = 0
+        chosen_move_size = movesize
         #
         # EDIT DOWN
         #
-        if self.boardsize is None:
-            self.boardsize = len(board)
 
-        # print("+"*50)
-        distance_to_enemy = abs(
-            self.enemy_stats['x'] - self.x) + abs(self.enemy_stats['y'] - self.y)
-        if distance_to_enemy >= movesize:
-            chosen_move_size = movesize
-        else:
-            chosen_move_size = distance_to_enemy
-        move_possible = []
         ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
-        # print(f"dist to e {distance_to_enemy}")
-        if distance_to_enemy == 2:
-            chosen_move_size = 1
-        # print(f"enemy is at ({ex},{ey})")
-        # print(f"I am at {x},{y}")
-        if x < ex:
-            # print(f"right")
-            if x + chosen_move_size <= self.boardsize - 1:
-                move_possible.append("right")
-        if x > ex:
-            # print(f"left")
-            if x - chosen_move_size >= 0:
-                move_possible.append("left")
 
-        if y < ey:
-            # print(f"down")
-            if y + chosen_move_size <= self.boardsize - 1:
-
-                move_possible.append("down")
-        if y > ey:
-            # print(f"up")
-            if y - chosen_move_size >= 0:
-
-                move_possible.append("up")
-        # self.print_board(board)
-
-        move_direction = self.directions[move_possible[random.randint(
-            0, len(move_possible) - 1)]]
-
-        # print("move dir",move_direction)
-        # print(f"Want to move {move_possible[move_direction]}")
-        futurex, futurey = 0, 0
-        if move_direction == 0:
-            futurey = y - chosen_move_size
-        elif move_direction == 1:
-            futurex = x + chosen_move_size
-        elif move_direction == 2:
-            futurey = y + chosen_move_size
-        elif move_direction == 3:
-            futurex = x - chosen_move_size
-        # print(f"future is ({futurex},{futurey})")
-        future_neighbors = self.get_neighbors(board, futurex, futurey)
-
-        neighbors = self.get_neighbors(board, x, y)
-        for i in range(len(neighbors)):
-            if neighbors[i] is not None:
-                if neighbors[i].c == self.enemy:
-                    # my enemy is standing next to me? Still?
-                    chosen_move_size = 0
-                    break
-        if x + 1 == ex:
-            # print("attack right")
-            attack_direction = 1
-        elif x - 1 == ex:
-            # print("attack left")
-
-            attack_direction = 3
-        elif y + 1 == ey:
-            # print("attack down")
-
-            attack_direction = 2
-        else:
-            # print("attack up")
-
+        if y == ey:
+            if x < ex:
+                move_direction = 1
+                attack_direction = 1
+            else:
+                move_direction = 3
+                attack_direction = 3
+        elif x == ex:
+            if y < ey:
+                move_direction = 2
+                attack_direction = 2
+            else:
+                move_direction = 0
+                attack_direction = 0
+        elif y > ey:
+            move_direction = 0
             attack_direction = 0
-        if self.health <= 20 and self.mana >= 50:
-            attack_direction = 4
-        # print(f"{self.name} {self.me}\n \tmoving {chosen_move_size} towards {move_direction} {self.sdirections[move_direction]}\n"
-        #       f"\tattacking {attack_direction} {self.sdirections[attack_direction]}")
+        elif ey > y:
+            move_direction = 2
+            attack_direction = 2
         if 0 <= chosen_move_size <= movesize:
             # print("yes")
             return move_direction, attack_direction, chosen_move_size
-
-
-class Tile(object):
-    distance_from_me = 0
-    distance_from_enemy = 0
-    x = 0
-    y = 0
-    c = " "
-
-    def __init__(self, x, y, c):
-        self.x = x
-        self.y = y
-        self.c = c
-
-    def add_player_locations(self, me, them):
-        self.distance_from_me = self.get_distance_to_player(me)
-        self.distance_from_enemy = self.get_distance_to_player(them)
-
-    def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
-
-    def get_distance_to_player(self, p):
-        d = abs(p[0] - self.x) + abs(p[1] - self.y)
-        return d
-
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        return "{}({},{})".format(self.c, self.x, self.y)
