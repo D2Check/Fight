@@ -1,7 +1,5 @@
 import random
-import math
-import sys
-from players.player import Player
+from player import Player
 
 
 class Xyf(Player):
@@ -18,7 +16,7 @@ class Xyf(Player):
     def get_neighbors(self, board, x, y):
         # Return 0-4: 0-Up, 1-Right, 2-Down, 3-Left
         neighbors = [None for e in range(4)]
-        if x + 1 < 20:
+        if x + 1 < self.boardsize:
             # right
             if board[x + 1][y] != self.enemy:
                 neighbors[1] = Tile(x + 1, y, board[x + 1][y])
@@ -31,7 +29,7 @@ class Xyf(Player):
             if board[x][y - 1] != self.enemy:
                 neighbors[0] = Tile(x, y - 1, board[x][y - 1])
 
-        if y + 1 < 20:
+        if y + 1 < self.boardsize:
             # down
             if board[x][y + 1] != self.enemy:
                 neighbors[2] = Tile(x, y + 1, board[x][y + 1])

@@ -1,8 +1,5 @@
 import random
-from players.player import Player
-from players.Xyf import Xyf
-from players.Pummel import Pummel
-from players.RShields import Rshields
+from player import Player
 from players.Timekeeper import Timekeeper
 from players.Filth import Filth
 
@@ -219,7 +216,7 @@ class Fight(object):
                 self.next_player_turn += 1
             else:
                 # p2 move
-                # self.print_board()
+                self.print_board()
                 self.make_move(p2, 2)
                 self.next_player_turn -= 1
             self.update_players()
@@ -436,7 +433,7 @@ class Fight(object):
 
 if __name__ == "__main__":
     wins = [0, 0]
-    games = 200
+    games = 1
     while games > 0:
         # print(f"games: {games}")
         f = Fight(20)

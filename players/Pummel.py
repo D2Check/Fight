@@ -1,7 +1,5 @@
 import random
-import math
-import sys
-from players.player import Player
+from player import Player
 
 
 class Pummel(Player):
