@@ -228,7 +228,8 @@ class Fight(object):
             self.update_players()
             if self.turns == 3500: # each player gets half of these turns to kill the other player.
                 # There's a long explanation for how I ended up at 3500 turns but, long story short,
-                # if you move literally randomly and just "aim" intelligently, the
+                # if you move literally randomly and just "aim" intelligently, the amount of turns both players could
+                # need will essentially NEVER be higher than 3500
                 timeout = True
                 break
         # SOMEONE HAS WON
@@ -236,10 +237,10 @@ class Fight(object):
             return None
         if self.healths[1] <= 0:
             self.winner = self.players[2].name
-            return 2, self.turns
+            return self.players[2].name, self.turns
         else:
             self.winner = self.players[1].name
-            return 1, self.turns
+            return self.players[2].name, self.turns
 
     def make_move(self, player: Player, index: int) -> None:
         #
@@ -449,23 +450,28 @@ class Fight(object):
 
 
 if __name__ == "__main__":
-    wins = [0, 0]
-    games = 1
+    p1 = import_player("Xyf")("1")
+    p2 = import_player("Rshields")("2")
+    wins = {
+       p1.name:0,
+       p2.name:0
+    }
+    games = 100
     while games > 0:
         # print(f"games: {games}")
         f = Fight(20)
         players = [
-            import_player("Timekeeper")("1"),
-            import_player("Pummel")("2")
+            p1,
+            p2
         ]
 
         f.add_players(players)
         # f.print_board()
         winner = f.fight()
+        if winner is not None:
+            wins[winner[0]] += 1
         # print(f"player {winner[0]} wins!")
         # print(f"game: {games} in turns: {winner[1]}")
-        if winner is not None:
-            wins[winner[0] - 1] += 1
         games -= 1
     print(wins)
 
