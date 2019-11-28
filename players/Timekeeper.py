@@ -13,7 +13,7 @@ class Timekeeper(Player):
         "left": 3
     }
     goal = None
-
+    have_teled = False
     sdirections = ["up", "right", "down", "left", "spell"]
 
     def __init__(self, c):
@@ -60,7 +60,6 @@ class Timekeeper(Player):
     #   if you are monk 4 gets health back
     def get_move(self, board, x, y, movesize):
         self.turns += 1
-        self.turns_since_tele += 1
         self.x = x  # YOUR X
         self.y = y  # YOUR Y
         ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
@@ -70,6 +69,8 @@ class Timekeeper(Player):
         attack_direction = 0
         chosen_move_size = 1
         ## YOUR CODE HERE
+        if self.have_teled:
+            self.turns_since_tele += 1
         ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
 
         if self.boardsize is None:
@@ -78,7 +79,7 @@ class Timekeeper(Player):
         self.set_goal(x, y, ex, ey)
         tx,ty = self.goal
         if y == ty:
-            # print("Timekeeper move y=ey")
+            # print("Timekeeper move y=ty")
             if x < tx:
                 # print("Timekeeper move right")
                 move_direction = 1
@@ -86,7 +87,7 @@ class Timekeeper(Player):
                 # print("Timekeeper move left")
                 move_direction = 3
         elif x == tx:
-            # print("Timekeeper move x=ex")
+            # print("Timekeeper move x=tx")
             if y < ty:
                 # print("Timekeeper move down")
                 move_direction = 2
@@ -111,8 +112,10 @@ class Timekeeper(Player):
         elif move_direction == 3:
             newx = x - 1
 
+        if newx == tx and newy == ty:
+            chosen_move_size = 0
         if newy == ey:
-            # print("Timekeeper attack y=ey")
+            # print("Timekeeper attack newy=ey")
             if newx < ex:
                 # print("Timekeeper attack right")
                 attack_direction = 1
@@ -120,7 +123,7 @@ class Timekeeper(Player):
                 # print("Timekeeper move left")
                 attack_direction = 3
         elif newx == ex:
-            # print("Timekeeper attack x=ex")
+            # print("Timekeeper attack newx=ex")
             if newy < ey:
                 # print("Timekeeper attack down")
                 attack_direction = 2
@@ -133,6 +136,15 @@ class Timekeeper(Player):
         elif ey > newy:
             # print("Timekeeper attacking down")
             attack_direction = 2
+        if self.health <= 30 and self.can_I_tele():
+            if self.have_teled:
+                if self.turns_since_tele > 10:
+                    attack_direction = 4
+                    self.turns_since_tele = 0
+            else:
+                self.have_teled = True
+                attack_direction = 4
+                self.turns_since_tele = 0
         if 0 <= chosen_move_size <= movesize:
             return move_direction, attack_direction, chosen_move_size
 
@@ -215,10 +227,12 @@ class Timekeeper(Player):
             if key == "left":
                 if ex - 5 >= 0:
                     possible[key] = self.get_metrics(x, y, ex - 5, ey)
-        move_dir = None
-        dist = 0
+        dist = None
         for k, v in possible.items():
             if v is not None:
-                if v[0] >= dist:
-                    move_dir = k
+                if dist is None:
+                    dist = v[0]
                     self.goal = v[3]
+                elif v[0] <= dist:
+                    self.goal = v[3]
+        # print(f"Goal is now({self.goal[0]},{self.goal[1]})")

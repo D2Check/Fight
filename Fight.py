@@ -17,53 +17,7 @@ class Fight(object):
     manas = None
     moves_index = None
     turns = 0
-    roles = {
-        # "CLASS":{
-        #   "move_size": the MAX spaces you can move,
-        #               it rotates, so for thief, if you moved up to three spaces last time
-        #               you can only move a max of 1 for the next 2 turns
-        #   "dmg": min,max dmg you do if you attack the player
-        #   "dmg_range": your attacks will go "this far" in the direction you choose
-        #   "health: Starting health
-        #   "mana": Starting mana if thats a thing
-        # },
-        "Thief": {
-            "move_size": [1, 1, 3],
-            "dmg": [4, 15],
-            "dmg_range": 1,
-            "health": 100,
-            "mana": 0,
 
-        },
-        "Warrior": {
-            "dmg": [7, 10],
-            "move_size": [1, 1, 2],
-            "dmg_range": 1,
-            "health": 100,
-            "mana": 0,
-        },
-        "Monk": {
-            "dmg": [1, 9],
-            "move_size": [1, 2],
-            "dmg_range": 2,
-            "mana": 100,
-            "health": 100,
-            "heal": 55  # Your action will heal you
-
-            # costs 50 mana
-        },
-        "Mage": {
-            "dmg": [3, 4],
-            "move_size": [1, 1, 2],
-            "dmg_range": 4,
-            "mana": 100,
-            "health": 60
-            # don't get hit
-            # Your action will teleport you to a random corner that the enemy isn't in
-            # costs 50 mana
-        },
-
-    }
 
     def __init__(self, size: int) -> None:
         """
@@ -240,7 +194,7 @@ class Fight(object):
             return self.players[2].name, self.turns
         else:
             self.winner = self.players[1].name
-            return self.players[2].name, self.turns
+            return self.players[1].name, self.turns
 
     def make_move(self, player: Player, index: int) -> None:
         #
@@ -413,6 +367,8 @@ class Fight(object):
                     # print("heal used")
                     # HEAL FOR HEAL AMOUNT
                     self.healths[me] += self.roles["Monk"]["heal"]
+                    if self.healths[me] > 100:
+                        self.healths[me] = 100
                 elif player.role == "Mage":
                     # THE MAGE TELEPORTS TO A RANDOM, UNOCCUPIED CORNER
                     ex, ey = self.players[enemy].x, self.players[enemy].y
@@ -448,30 +404,78 @@ class Fight(object):
         self.board[player.x][player.y] = player.me
         self.update_players()
 
+    roles = {
+        # "CLASS":{
+        #   "move_size": the MAX spaces you can move,
+        #               it rotates, so for thief, if you moved up to three spaces last time
+        #               you can only move a max of 1 for the next 2 turns
+        #   "dmg": min,max dmg you do if you attack the player
+        #   "dmg_range": your attacks will go "this far" in the direction you choose
+        #   "health: Starting health
+        #   "mana": Starting mana if thats a thing
+        # },
+        "Thief": {
+            "move_size": [1, 1, 3],
+            "dmg": [4, 14],
+            "dmg_range": 1,
+            "health": 100,
+            "mana": 0,
 
-if __name__ == "__main__":
-    p1 = import_player("Xyf")("1")
-    p2 = import_player("Rshields")("2")
-    wins = {
-       p1.name:0,
-       p2.name:0
+        },
+        "Warrior": {
+            "dmg": [8, 10],
+            "move_size": [1, 1, 2],
+            "dmg_range": 1,
+            "health": 100,
+            "mana": 0,
+        },
+        "Monk": {
+            "dmg": [2, 8],
+            "move_size": [1, 2],
+            "dmg_range": 2,
+            "mana": 100,
+            "health": 100,
+            "heal": 43  # Your action will heal you
+
+            # costs 50 mana
+        },
+        "Mage": {
+            "dmg": [0,22],
+            "move_size": [1, 1,2],
+            "dmg_range": 4,
+            "mana": 100,
+            "health": 60
+            # don't get hit
+            # Your action will teleport you to a random corner that the enemy isn't in
+            # costs 50 mana
+        },
+
     }
-    games = 100
-    while games > 0:
-        # print(f"games: {games}")
-        f = Fight(20)
-        players = [
-            p1,
-            p2
-        ]
+if __name__ == "__main__":
+    all = ["Filth","Pummel","Rshields","Xyf"]
+    for p in all:
+        p1 = import_player(p)("1")
+        p2 = import_player("Timekeeper")("2")
+        wins = {
+           p1.name:0,
+           p2.name:0
+        }
+        games = 100
+        while games > 0:
+            # print(f"games: {games}")
+            f = Fight(20)
+            players = [
+                p1,
+                p2
+            ]
 
-        f.add_players(players)
-        # f.print_board()
-        winner = f.fight()
-        if winner is not None:
-            wins[winner[0]] += 1
-        # print(f"player {winner[0]} wins!")
-        # print(f"game: {games} in turns: {winner[1]}")
-        games -= 1
-    print(wins)
+            f.add_players(players)
+            # f.print_board()
+            winner = f.fight()
+            if winner is not None:
+                wins[winner[0]] += 1
+            # print(f"player {winner[0]} wins!")
+            # print(f"game: {games} in turns: {winner[1]}")
+            games -= 1
+        print(wins)
 

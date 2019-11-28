@@ -5,7 +5,7 @@ import players
 import multiprocessing
 import time
 
-games_per_matchup = 100
+games_per_matchup = 2000
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
@@ -28,7 +28,8 @@ if __name__ == '__main__':
     longestname = ""
     # totalgames = len(matchups) * games_per_matchup
     times = []
-    p = multiprocessing.Pool()
+    # p = multiprocessing.Pool()
+    start = time.time()
     for i, game_players in enumerate(matchups):
         # print(f"Games between {game_players[0]} and {game_players[1]}")
         if len(game_players[0]) >= len(game_players[1]):
@@ -42,11 +43,10 @@ if __name__ == '__main__':
             f = Fight(random.randint(15, 35))
             p1, p2 = get_players(game_players)
             f.add_players([p1, p2])
-            start = time.time()
             # winner = p.apply(f.fight)
             winner = f.fight()
+            games_finished += 1
             if winner is not None:
-                games_finished += 1
                 players[winner[0]][0] += 1
             players[p1.name][1] += 1
             players[p2.name][1] += 1
@@ -57,7 +57,7 @@ if __name__ == '__main__':
                 + f'|| {i + 1}/{len(matchups)} matchups ({game_players[0]} vs {game_players[1]})'
                 + ' ' * 30, end='\r')
     print('\n')
-
+    print(f"took {time.time()-start} seconds")
     for name, game_stats in players.items():
         spaces = (len(longestname) - len(name)) * " "
         print("{}{} {:>5} {:8}".format(spaces, name, round(

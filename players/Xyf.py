@@ -54,7 +54,7 @@ class Xyf(Player):
         # movesize is how far you can move this turn. you can chose to move 0 >= choice <= movesize
         move_direction = 0
         attack_direction = 0
-        chosen_move_size = 0
+        chosen_move_size = movesize
         #
         # EDIT DOWN
         #

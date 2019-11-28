@@ -20,6 +20,8 @@ class Player(object):
         else:
             self.enemy = '1'
         roles = ["Thief", "Warrior", "Monk", "Mage"]
+        if self.__class__.__name__ == "Player":
+            raise Exception("Player should never be instantiated")
         if role not in roles:
             raise AttributeError("Bad Role Chosen", role)
         self.role = role
