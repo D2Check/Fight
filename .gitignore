@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# standard Round Robin Tournament output
+leaderboard.txt

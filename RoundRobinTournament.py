@@ -4,6 +4,7 @@ from Fight import Fight, import_player
 import players
 import multiprocessing
 import time
+import sys
 
 games_per_matchup = 2000
 
@@ -58,7 +59,19 @@ if __name__ == '__main__':
                 + ' ' * 30, end='\r')
     print('\n')
     print(f"took {time.time()-start} seconds")
-    for name, game_stats in players.items():
-        spaces = (len(longestname) - len(name)) * " "
-        print("{}{} {:>5} {:8}".format(spaces, name, round(
-            100 * game_stats[0] / game_stats[1], 2), game_stats[0]))
+    if(sys.argv[1] == '--export'):
+        if(len(sys.argv)==2):
+            path = 'leaderboard.txt'
+        else:
+            path = sys.argv[2]
+
+        f = open(path, "w")
+        for name, game_stats in players.items():
+            f.write(f'{name}\t{game_stats[0]}\t{game_stats[1]}\n')
+        f.close()
+        print(f'leaderboard was exported to {path}')
+    else:
+        for name, game_stats in players.items():
+            spaces = (len(longestname) - len(name)) * " "
+            print("{}{} {:>5} {:8}".format(spaces, name, round(
+                100 * game_stats[0] / game_stats[1], 2), game_stats[0]))
