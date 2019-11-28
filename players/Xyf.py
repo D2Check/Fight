@@ -61,81 +61,69 @@ class Xyf(Player):
         if self.boardsize is None:
             self.boardsize = len(board)
 
-        # print("+"*50)
-        distance_to_enemy = abs(self.enemy_stats['x'] - self.x) + abs(self.enemy_stats['y'] - self.y)
-        if distance_to_enemy >= movesize:
-            chosen_move_size = movesize
-        else:
-            chosen_move_size = distance_to_enemy
-        move_possible = []
-        ex, ey = self.enemy_stats['x'],self.enemy_stats['y']
-        # print(f"dist to e {distance_to_enemy}")
-        if distance_to_enemy == 2:
-            chosen_move_size = 1
-        # print(f"enemy is at ({ex},{ey})")
-        # print(f"I am at {x},{y}")
-        if x < ex:
-            # print(f"right")
-            if x + chosen_move_size <= self.boardsize-1:
-                move_possible.append("right")
-        if x > ex:
-            # print(f"left")
-            if x - chosen_move_size >=0:
-                move_possible.append("left")
+        ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
+        # print(f"Pummel Im at ({x},{y}) E at ({ex},{ey})")
+        if y == ey:
+            # print("Pummel move y=ey")
+            if x < ex:
+                # print("Pummel move right")
+                move_direction = 1
+            else:
+                # print("Pummel move left")
+                move_direction = 3
+        elif x == ex:
+            # print("Pummel move x=ex")
+            if y < ey:
+                # print("Pummel move down")
+                move_direction = 2
+            else:
+                # print("Pummel move up")
+                move_direction = 0
+        elif y > ey:
+            # print("Pummel moving up")
+            move_direction = 0
+        elif ey > y:
+            # print("Pummel moving down")
+            move_direction = 2
 
-        if y < ey:
-            # print(f"down")
-            if y + chosen_move_size <=self.boardsize-1:
-
-                move_possible.append("down")
-        if y > ey:
-            # print(f"up")
-            if y - chosen_move_size >= 0:
-
-                move_possible.append("up")
-        # self.print_board(board)
-
-
-        move_direction = self.directions[move_possible[random.randint(0, len(move_possible)-1)]]
-
-        # print("move dir",move_direction)
-        # print(f"Want to move {move_possible[move_direction]}")
-        futurex, futurey = 0, 0
+        newx = x
+        newy = y
         if move_direction == 0:
-            futurey = y - chosen_move_size
+            newy = y - movesize
         elif move_direction == 1:
-            futurex = x + chosen_move_size
+            newx = x + movesize
         elif move_direction == 2:
-            futurey = y + chosen_move_size
+            newy = y + movesize
         elif move_direction == 3:
-            futurex = x - chosen_move_size
-        # print(f"future is ({futurex},{futurey})")
-        future_neighbors = self.get_neighbors(board,futurex, futurey)
+            newx = x - movesize
 
+        if board[newx][newy] == self.enemy:
+            chosen_move_size = 0
+            newx = x
+            newy = y
 
-        neighbors = self.get_neighbors(board, x, y)
-        for i in range(len(neighbors)):
-            if neighbors[i] is not None:
-                if neighbors[i].c == self.enemy:
-                    # my enemy is standing next to me? Still?
-                    chosen_move_size = 0
-                    break
-        if x + 1 == ex:
-            # print("attack right")
-            attack_direction = 1
-        elif x - 1 == ex:
-            # print("attack left")
-
-            attack_direction = 3
-        elif y + 1 == ey:
-            # print("attack down")
-
-            attack_direction = 2
-        else:
-            # print("attack up")
-
+        if newy == ey:
+            # print("Pummel attack y=ey")
+            if newx < ex:
+                # print("Pummel attack right")
+                attack_direction = 1
+            else:
+                # print("Pummel move left")
+                attack_direction = 3
+        elif newx == ex:
+            # print("Pummel attack x=ex")
+            if newy < ey:
+                # print("Pummel attack down")
+                attack_direction = 2
+            else:
+                # print("Pummel attack up")
+                attack_direction = 0
+        elif newy > ey:
+            # print("Pummel attacking up")
             attack_direction = 0
-
+        elif ey > newy:
+            # print("Pummel attacking down")
+            attack_direction = 2
         # print(f"{self.name} {self.me}\n \tmoving {chosen_move_size} towards {move_direction} {self.sdirections[move_direction]}\n"
         #       f"\tattacking {attack_direction} {self.sdirections[attack_direction]}")
         if 0 <= chosen_move_size <= movesize:

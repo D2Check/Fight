@@ -103,6 +103,8 @@ class Pummel(Player):
         elif ey > newy:
             # print("Pummel attacking down")
             attack_direction = 2
+        if self.health <= 20 and self.mana >= 50 :
+            attack_direction = 4
         if 0 <= chosen_move_size <= movesize:
             # print("yes")
             return move_direction, attack_direction, chosen_move_size
