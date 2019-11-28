@@ -12,6 +12,7 @@ class Timekeeper(Player):
         "down": 2,
         "left": 3
     }
+    goal = None
 
     sdirections = ["up", "right", "down", "left", "spell"]
 
@@ -24,7 +25,7 @@ class Timekeeper(Player):
     def get_metrics(self, x, y, ex, ey):
         # print(f"dist abs({ex} - {x}) + abs({ey}-{y})")
         distance_to_enemy = abs(ex - x) + abs(ey - y)
-        return (distance_to_enemy, self.can_enemy_target_me(x, y, ex, ey), self.can_I_target_enemy(x, y, ex, ey))
+        return (distance_to_enemy, self.can_enemy_target_me(x, y, ex, ey), self.can_I_target_enemy(x, y, ex, ey),(ex,ey))
         # return 0,0, self.can_I_target_enemy(x, y,ex,ey)
 
     def print_possible_moves(self, possible):
@@ -69,138 +70,69 @@ class Timekeeper(Player):
         attack_direction = 0
         chosen_move_size = 1
         ## YOUR CODE HERE
+        ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
+
         if self.boardsize is None:
             self.boardsize = len(board)
 
-        possible = {
-            "up": None,
-            "right": None,
-            "down": None,
-            "left": None,
-        }
-        for key in possible.keys():
-            if key == "up":
-                if y - 1 >= 0 and not (x == ex and y - 1 == ey):
-                    possible[key] = self.get_metrics(x, y - 1, ex, ey)
-            if key == "right":
-                if x + 1 < self.boardsize and not (y == ey and x + 1 == ex):
-                    possible[key] = self.get_metrics(x + 1, y, ex, ey)
-            if key == "down":
-                if y + 1 < self.boardsize and not (x == ex and y + 1 == ey):
-                    possible[key] = self.get_metrics(x, y + 1, ex, ey)
-            if key == "left":
-                if x - 1 >= 0 and not (y == ey and x - 1 == ex):
-                    possible[key] = self.get_metrics(x - 1, y, ex, ey)
-
-        # self.print_possible_moves(possible)
-        better = []
-        for k, v in possible.items():
-            if v is not None:
-                dist, din, dout = v
-                if dout != -1 and din == -1:
-                    # print(f"safe: move:{k} attack:{self.sdirections[dout]}")
-                    better.append((dist,k, dout))
-
-        else:
-            # TODO
-            # LOOP FOR WHEN WE CAN BOTH HIT EACH OTHER, WE ARE FACING ANOTHER MAGE
-            pass
-        # print("better",better)
-        sorted_possibles = sorted(better, key=lambda tup: tup[0])
-        # print("sorted better",sorted_possibles)
-        if len(better) == 0:
-            # GET OUT OF THE CORNERS
-            # print("no safe")
-            choice = -1
-            if x < 4 and y < 4:
-                # print("corner top left")
-                choice = random.randint(1, 2)
-                if choice == 1:
-                    if x + 1 == ex and y == ey:
-                        choice = 2
-                else:
-                    if x == ex and y + 1 == ey:
-                        choice = 1
-
-            elif x < 4 and y > self.boardsize - 4:
-                # print("corner bottom left")
-                choice = random.randint(0, 1)
-                if choice == 1:
-                    if x + 1 == ex and y == ey:
-                        choice = 0
-                else:
-                    if x == ex and y - 1 == ey:
-                        choice = 1
-            elif x > self.boardsize - 4 and y < 4:
-                # print("corner top right")
-                choice = random.randint(2, 3)
-                if choice == 2:
-                    if x == ex and y - 1 == ey:
-                        choice = 3
-                else:
-                    if y == ey and x - 1 == ex:
-                        choice = 2
-            elif x > self.boardsize - 4 and y > self.boardsize - 4:
-                # print("corner bottom right")
-
-                toss = random.randint(0, 1)
-                if toss == 1:
-                    choice = 0
-                else:
-                    choice = 3
-                if choice == 0:
-                    if x == ex and y - 1 == ey:
-                        choice = 3
-                else:
-                    if x - -1 == ex and y == ey:
-                        choice = 0
-
-            # IM NOT IN A CORNER, RUN LIKE HELL
-            elif 0 <= x < int(self.boardsize / 2) and 0 <= y < int(self.boardsize / 2) - 1:
-                # print("top left, move right or up")
-                choice = 1
-                if y == ey and x + 1 == ex:
-                    choice = 0
-            elif int(self.boardsize / 2) <= x <= self.boardsize - 1 and 0 <= y < int(self.boardsize / 2) - 1:
-                # print("top right, move down or right")
-
-                choice = 0
-                if y + 1 == ey and x == ex:
-                    choice = 1
-            elif int(self.boardsize / 2) <= x <= self.boardsize - 1 and int(
-                    self.boardsize / 2) <= y <= self.boardsize - 1:
-                # print("bottom right, move left or down")
-                choice = 3
-
-                if x - 1 == ex and y == ey:
-                    choice = 2
-            elif 0 <= x < int(self.boardsize / 2) and int(self.boardsize / 2) <= y <= self.boardsize - 1:
-                # print("bottom left, move up or left")
-
-                choice = 0
-                if y - 1 == ey and x == ex:
-                    choice = 3
+        self.set_goal(x, y, ex, ey)
+        tx,ty = self.goal
+        if y == ty:
+            # print("Timekeeper move y=ey")
+            if x < tx:
+                # print("Timekeeper move right")
+                move_direction = 1
             else:
-                pass
-                # print(f"Something went wrong")
-                # print(f"Im at ({x},{y})")
-                # print(f"int(self.boardsize / 2) = {int(self.boardsize / 2)}")
-                # print(f"self.boardsize-1 = {self.boardsize - 1}")
+                # print("Timekeeper move left")
+                move_direction = 3
+        elif x == tx:
+            # print("Timekeeper move x=ex")
+            if y < ty:
+                # print("Timekeeper move down")
+                move_direction = 2
+            else:
+                # print("Timekeeper move up")
+                move_direction = 0
+        elif y > ty:
+            # print("Timekeeper moving up")
+            move_direction = 0
+        elif ty > y:
+            # print("Timekeeper moving down")
+            move_direction = 2
 
-            if 9 <= x <= 10 and 9 <= y <= 10:
-                # IM IN THE CENTER OF THE MAP
-                # print("Center of the map")
-                if self.can_I_tele() and self.health <= 40:
-                    # print("Teled out")
-                    attack_direction = 4
-            # print(f"I chose to move {self.sdirections[choice]}")
-            move_direction = choice
-            chosen_move_size = 1
-        else:
+        newx = x
+        newy = y
+        if move_direction == 0:
+            newy = y - 1
+        elif move_direction == 1:
+            newx = x + 1
+        elif move_direction == 2:
+            newy = y + 1
+        elif move_direction == 3:
+            newx = x - 1
 
-            move_direction = self.directions[better[0][1]]
-            attack_direction = better[0][2]
-
+        if newy == ey:
+            # print("Timekeeper attack y=ey")
+            if newx < ex:
+                # print("Timekeeper attack right")
+                attack_direction = 1
+            else:
+                # print("Timekeeper move left")
+                attack_direction = 3
+        elif newx == ex:
+            # print("Timekeeper attack x=ex")
+            if newy < ey:
+                # print("Timekeeper attack down")
+                attack_direction = 2
+            else:
+                # print("Timekeeper attack up")
+                attack_direction = 0
+        elif newy > ey:
+            # print("Timekeeper attacking up")
+            attack_direction = 0
+        elif ey > newy:
+            # print("Timekeeper attacking down")
+            attack_direction = 2
         if 0 <= chosen_move_size <= movesize:
             return move_direction, attack_direction, chosen_move_size
 
@@ -238,11 +170,11 @@ class Timekeeper(Player):
         erole = self.enemy_stats["role"]
         drange = 0
         if erole == "Warrior" or erole == "Thief":
-            drange = 1
-        elif erole == "Monk":
             drange = 2
+        elif erole == "Monk":
+            drange = 3
         else:
-            drange = 4
+            drange = 5
         # up
         if x == ex and abs(ey - y) <= drange:
             # print(f"{erole} ({x},{y}) ({ex},{ey}) up")
@@ -262,3 +194,31 @@ class Timekeeper(Player):
             # print(f"{erole} ({x},{y}) ({ex},{ey}) left")
             return 3
         return -1
+
+    def set_goal(self, x, y, ex, ey):
+        possible = {
+            "up": None,
+            "right": None,
+            "down": None,
+            "left": None
+        }
+        for key in possible.keys():
+            if key == "up":
+                if ey - 5 >= 0:
+                    possible[key] = self.get_metrics(x, y, ex - 5, ey)
+            if key == "right":
+                if ex + 5 < self.boardsize:
+                    possible[key] = self.get_metrics(x, y, ex + 5, ey)
+            if key == "down":
+                if ey + 5 < self.boardsize:
+                    possible[key] = self.get_metrics(x, y, ex, ey + 5)
+            if key == "left":
+                if ex - 5 >= 0:
+                    possible[key] = self.get_metrics(x, y, ex - 5, ey)
+        move_dir = None
+        dist = 0
+        for k, v in possible.items():
+            if v is not None:
+                if v[0] >= dist:
+                    move_dir = k
+                    self.goal = v[3]
