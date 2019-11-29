@@ -16,7 +16,6 @@ class Pummel(Player):
         role = "Monk"
         # print(f"Pummel {c}")
 
-        super().__init__(role, c)
         super().__init__(self.__class__.__name__,role, c)
 
 
