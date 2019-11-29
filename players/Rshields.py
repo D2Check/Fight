@@ -1,6 +1,10 @@
 from player import Player
 import random
-
+UP = 0
+RIGHT = 1
+DOWN = 2
+LEFT = 3
+SPELL = 4
 
 class Rshields(Player):
     # Feel free to add variables here.

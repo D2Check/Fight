@@ -1,5 +1,9 @@
 from player import Player
-
+UP = 0
+RIGHT = 1
+DOWN = 2
+LEFT = 3
+SPELL = 4
 
 class Filth(Player):
     # Feel free to add variables here.

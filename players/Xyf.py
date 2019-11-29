@@ -1,7 +1,11 @@
 import random
 from player import Player
 
-
+UP = 0
+RIGHT = 1
+DOWN = 2
+LEFT = 3
+SPELL = 4
 class Xyf(Player):
     # THIEF
     boardsize = None

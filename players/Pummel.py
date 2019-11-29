@@ -2,7 +2,11 @@ import random
 import math
 import sys
 from player import Player
-
+UP = 0
+RIGHT = 1
+DOWN = 2
+LEFT = 3
+SPELL = 4
 
 class Pummel(Player):
     # Monk
