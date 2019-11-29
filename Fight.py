@@ -112,7 +112,7 @@ class Fight(object):
 
             self.set_space(player.x, player.y, player.me)
 
-            # TODO Allow Thief to choose when to move farther
+            # TODO Allow classes to choose when to move farther
             new_moves_index.append(random.randint(
                 0, len(self.roles[player.role]["move_size"]) - 1))
             i += 1
@@ -180,7 +180,7 @@ class Fight(object):
                 self.make_move(p2, 2)
                 self.next_player_turn -= 1
             self.update_players()
-            if self.turns == 3500: # each player gets half of these turns to kill the other player.
+            if self.turns == 4500: # each player gets half of these turns to kill the other player.
                 # There's a long explanation for how I ended up at 3500 turns but, long story short,
                 # if you move literally randomly and just "aim" intelligently, the amount of turns both players could
                 # need will essentially NEVER be higher than 3500
@@ -188,6 +188,7 @@ class Fight(object):
                 break
         # SOMEONE HAS WON
         if timeout:
+            # print("QUIT DUE TO TIMEOUT")
             return None
         if self.healths[1] <= 0:
             self.winner = self.players[2].name
@@ -440,8 +441,8 @@ class Fight(object):
             # costs 50 mana
         },
         "Mage": {
-            "dmg": [0,22],
-            "move_size": [1, 1,2],
+            "dmg": [1,19],
+            "move_size": [1, 1, 2],
             "dmg_range": 4,
             "mana": 100,
             "health": 60
@@ -452,7 +453,8 @@ class Fight(object):
 
     }
 if __name__ == "__main__":
-    all = ["Filth","Pummel","Rshields","Xyf"]
+    # all = ["Filth","Pummel","Rshields","Xyf"]
+    all = ["Pummel"]
     for p in all:
         p1 = import_player(p)("1")
         p2 = import_player("Timekeeper")("2")
@@ -460,7 +462,7 @@ if __name__ == "__main__":
            p1.name:0,
            p2.name:0
         }
-        games = 100
+        games = 1
         while games > 0:
             # print(f"games: {games}")
             f = Fight(20)

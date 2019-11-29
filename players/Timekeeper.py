@@ -59,6 +59,7 @@ class Timekeeper(Player):
     #   if you are mage 4 moves you randomly (not near your enemy),
     #   if you are monk 4 gets health back
     def get_move(self, board, x, y, movesize):
+        global UP,DOWN,LEFT,RIGHT,SPELL
         self.turns += 1
         self.x = x  # YOUR X
         self.y = y  # YOUR Y
@@ -75,31 +76,31 @@ class Timekeeper(Player):
 
         if self.boardsize is None:
             self.boardsize = len(board)
-
-        self.set_goal(x, y, ex, ey)
+        if self.turns == 1 or self.turns % 3 == 0:
+            self.set_goal(x, y, ex, ey)
         tx,ty = self.goal
         if y == ty:
             # print("Timekeeper move y=ty")
             if x < tx:
                 # print("Timekeeper move right")
-                move_direction = 1
+                move_direction = RIGHT
             else:
                 # print("Timekeeper move left")
-                move_direction = 3
+                move_direction = LEFT
         elif x == tx:
             # print("Timekeeper move x=tx")
             if y < ty:
                 # print("Timekeeper move down")
-                move_direction = 2
+                move_direction = DOWN
             else:
                 # print("Timekeeper move up")
-                move_direction = 0
+                move_direction = UP
         elif y > ty:
             # print("Timekeeper moving up")
-            move_direction = 0
+            move_direction = UP
         elif ty > y:
             # print("Timekeeper moving down")
-            move_direction = 2
+            move_direction = DOWN
 
         newx = x
         newy = y
@@ -114,36 +115,37 @@ class Timekeeper(Player):
 
         if newx == tx and newy == ty:
             chosen_move_size = 0
+        # print(f"x,y = ({newx},{newy}) ex,ey({ex},{ey})")
         if newy == ey:
             # print("Timekeeper attack newy=ey")
             if newx < ex:
                 # print("Timekeeper attack right")
-                attack_direction = 1
+                attack_direction = RIGHT
             else:
-                # print("Timekeeper move left")
-                attack_direction = 3
+                # print("Timekeeper attack left")
+                attack_direction = LEFT
         elif newx == ex:
             # print("Timekeeper attack newx=ex")
             if newy < ey:
                 # print("Timekeeper attack down")
-                attack_direction = 2
+                attack_direction = DOWN
             else:
                 # print("Timekeeper attack up")
-                attack_direction = 0
+                attack_direction = UP
         elif newy > ey:
             # print("Timekeeper attacking up")
-            attack_direction = 0
+            attack_direction = UP
         elif ey > newy:
             # print("Timekeeper attacking down")
-            attack_direction = 2
+            attack_direction = DOWN
         if self.health <= 30 and self.can_I_tele():
             if self.have_teled:
-                if self.turns_since_tele > 10:
-                    attack_direction = 4
+                if self.turns_since_tele > 11:
+                    attack_direction = SPELL
                     self.turns_since_tele = 0
             else:
                 self.have_teled = True
-                attack_direction = 4
+                attack_direction = SPELL
                 self.turns_since_tele = 0
         if 0 <= chosen_move_size <= movesize:
             return move_direction, attack_direction, chosen_move_size
@@ -217,7 +219,7 @@ class Timekeeper(Player):
         for key in possible.keys():
             if key == "up":
                 if ey - 5 >= 0:
-                    possible[key] = self.get_metrics(x, y, ex - 5, ey)
+                    possible[key] = self.get_metrics(x, y, ex, ey-5)
             if key == "right":
                 if ex + 5 < self.boardsize:
                     possible[key] = self.get_metrics(x, y, ex + 5, ey)
@@ -230,9 +232,10 @@ class Timekeeper(Player):
         dist = None
         for k, v in possible.items():
             if v is not None:
+                # print(f"evaluating {v[3]} at {v[0]}")
                 if dist is None:
                     dist = v[0]
                     self.goal = v[3]
-                elif v[0] <= dist:
+                elif v[0] < dist:
                     self.goal = v[3]
         # print(f"Goal is now({self.goal[0]},{self.goal[1]})")

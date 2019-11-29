@@ -6,7 +6,7 @@ import multiprocessing
 import time
 import sys
 
-games_per_matchup = 2000
+games_per_matchup = 50
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
