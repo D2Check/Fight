@@ -13,7 +13,8 @@ class Pummel(Player):
         # print(f"Pummel {c}")
 
         super().__init__(role, c)
-        self.name = self.__class__.__name__
+        super().__init__(self.__class__.__name__,role, c)
+
 
     # OVERRIDE THIS in your class!
     # board - current state of the board

@@ -462,7 +462,7 @@ if __name__ == "__main__":
            p1.name:0,
            p2.name:0
         }
-        games = 1
+        games = 1000
         while games > 0:
             # print(f"games: {games}")
             f = Fight(20)

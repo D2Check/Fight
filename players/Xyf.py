@@ -9,8 +9,8 @@ class Xyf(Player):
     def __init__(self, c):
         role = "Thief"
         # print(f"Xyf {c}")
-        super().__init__(role, c)
-        self.name = self.__class__.__name__
+        super().__init__(self.__class__.__name__,role, c)
+
 
 
     def get_neighbors(self, board, x, y):

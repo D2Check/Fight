@@ -1,6 +1,11 @@
 from player import Player
 import random
 
+UP = 0
+RIGHT = 1
+DOWN = 2
+LEFT = 3
+SPELL = 4
 
 class Timekeeper(Player):
     turns = 0
@@ -19,8 +24,8 @@ class Timekeeper(Player):
     def __init__(self, c):
         role = "Mage"
         # print(f"Timekeeper {c}")
-        super().__init__(role, c)
-        self.name = self.__class__.__name__
+        super().__init__(self.__class__.__name__,role, c)
+
 
     def get_metrics(self, x, y, ex, ey):
         # print(f"dist abs({ex} - {x}) + abs({ey}-{y})")

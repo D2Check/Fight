@@ -11,14 +11,14 @@ class Player(object):
     mana = None
     my_stats = None
     role = None
-    me = None # THIS IS YOUR SYMBOL
-    enemy = None # THIS IS THEIR SYMBOL
+    me = None
+    enemy = None
     x = None
     y = None
 
-    def __init__(self, role, c):
+    def __init__(self, name, role, c):
         self.me = c
-        self.name = self.__class__.__name__
+        self.name = name
         if self.me == '1':
             self.enemy = '2'
         else:

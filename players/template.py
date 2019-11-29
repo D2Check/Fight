@@ -1,5 +1,9 @@
 from player import Player
-
+UP = 0
+RIGHT = 1
+DOWN = 2
+LEFT = 3
+SPELL = 4
 
 class YOURNAMEHERE(Player):
     # Feel free to add variables here.
@@ -8,8 +12,7 @@ class YOURNAMEHERE(Player):
 
     def __init__(self,  c):
         role = "CHOSE YOUR ROLE" # You can replace this with Warrior or Thief or Mage or Monk
-        super().__init__(role, c)
-        self.name = self.__class__.__name__
+        super().__init__(self.__class__.__name__,role, c)
 
     # OVERRIDE THIS in your class!
     # board - current state of the board

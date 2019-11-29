@@ -10,9 +10,8 @@ class Rshields(Player):
     def __init__(self, c):
         role = "Warrior"  # DECLARE YOUR ROLE HERE
         # print(f"Rshields {c}")
+        super().__init__(self.__class__.__name__,role, c)
 
-        super().__init__(role, c)
-        self.name = self.__class__.__name__
 
     # OVERRIDE THIS in your class!
     # board - current state of the board
