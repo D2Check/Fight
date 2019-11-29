@@ -25,19 +25,10 @@ if __name__ == '__main__':
 
     games_finished = 0
     games_skipped = 0
-    longestname = ""
-    # totalgames = len(matchups) * games_per_matchup
     times = []
-    # p = multiprocessing.Pool()
     start = time.time()
     for i, game_players in enumerate(matchups):
         # print(f"Games between {game_players[0]} and {game_players[1]}")
-        if len(game_players[0]) >= len(game_players[1]):
-            if len(game_players[0]) > len(longestname):
-                longestname = game_players[0]
-        else:
-            if len(game_players[1]) > len(longestname):
-                longestname = game_players[1]
         games = 0
         last_winner = None
         consecutive_wins = 0
@@ -45,7 +36,6 @@ if __name__ == '__main__':
             f = Fight(random.randint(15, 35))
             p1, p2 = get_players(game_players)
             f.add_players([p1, p2])
-            # winner = p.apply(f.fight)
 
             winner = f.fight()
             games_finished += 1
@@ -85,6 +75,11 @@ if __name__ == '__main__':
         f.close()
         print(f'leaderboard was exported to {path}')
     else:
+        longestname = ""
+        for player in player_classes:
+            if len(longestname) < len(player.__class__.__name__):
+                longestname = player.__class__.__name__
+
         for name, game_stats in players.items():
             spaces = (len(longestname) - len(name)) * " "
             print("{}{} {:>5} {:8} {:8}".format(spaces, name, round(
