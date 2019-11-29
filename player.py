@@ -1,5 +1,9 @@
 import random
-
+UP = 0
+RIGHT = 1
+DOWN = 2
+LEFT = 3
+SPELL = 4
 class Player(object):
     name = None
     enemy_stats = None
@@ -33,6 +37,7 @@ class Player(object):
         return self.me
 
     def get_move(self, board, x, y, movesize):
+        global UP, DOWN, LEFT, RIGHT
         self.x = x
         self.y = y
         # attack and move randomly. This will work, right?

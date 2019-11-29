@@ -22,12 +22,17 @@ class YOURNAMEHERE(Player):
     #   if you are monk 4 gets health back
 
     def get_move(self, board, x, y, movesize):
+        global UP, DOWN, LEFT, RIGHT, SPELL
         self.x = x # YOUR X
         self.y = y # YOUR Y
         # movesize is how far you can move this turn. you can chose to move 0 <= choice <= movesize
         move_direction = 0
         attack_direction = 0
         chosen_move_size = 0
+        #
+        # Feel free to use the UP, DOWN, LEFT and RIGHT constants for movement and attacking
+        # move_direction = RIGHT for example
+        #
         ## YOUR CODE HERE
 
         ## YOUR CODE STOP HERE
