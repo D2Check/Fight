@@ -152,7 +152,7 @@ def get_sight(board, x, y, size, cross_centers):
                 ax, ay, bx, by, cx, cy = large_triangle
                 inside_large = isInside(ax, ay, bx, by, cx, cy, testx, testy)
                 if inside_large and not inside_small and board[testx][testy] not in dont_change:
-                    board[testx][testy] = ","
+                    board[testx][testy] = " "
     return board
 
 
