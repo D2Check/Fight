@@ -16,14 +16,14 @@
 
 ## INFO
 * While it is your turn to move and attack, the other player will not move.
-* There are several class fields that will be inherited from the player class. You should look at that class to see what is available to you.
+* There are several class fields that will be inherited from the __player__ class. You should look at that class to see what is available to you.
 * Some of the things that may be helpful:
-1) enemy_stats and my_stats are dictionaries containing both players x,y,health,mana and role.
-2) me and enemy are the symbols on the board. me is your symbol, enemy is the enemies symbol
+1) __enemy_stats__ and __my_stats__ are dictionaries containing both players x,y,health,mana and role.
+2) __me__ and __enemy__ are the symbols on the board. me is your symbol, enemy is the enemies symbol
 3) Your location is given to you every turn as well as the board
-* get_move needs to return 3 values as a tuple.
+* __get_move__ needs to return 3 values as a tuple.
 They are: Which way do you want to go, which way you want to attack, and how far should you move.
-You can use the global UP, DOWN, LEFT and RIGHT to move and attack. Remember, you will ALWAYS move then attack. The Mage and Monk can also use a spell. The Monk heals themself and the Mage teleports away to a corner. The argument movesize is the maximum  amount of space you can move. You use your SPELL by returning SPELL as the attack direction.
+You can use the global __UP__, __DOWN__, __LEFT__ and __RIGHT__ to move and attack. Remember, you will ALWAYS move then attack. The Mage and Monk can also use a spell. The Monk heals themself and the Mage teleports away to a corner. The argument movesize is the maximum  amount of space you can move. You use your SPELL by returning __SPELL__ as the attack direction.
 * If you try to move farther than the game told you was possible. You die.
 * If you try to move onto a player or off the board, you will stay still, but still attack.
 * your move direction and chosen move size will still make you move if you use a spell.
