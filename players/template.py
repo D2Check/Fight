@@ -4,14 +4,15 @@ RIGHT = 1
 DOWN = 2
 LEFT = 3
 SPELL = 4
-
+# Change YOURNAMEHERE to the name of the filename without the .py
+# So if your filename is Mario.py you would put Mario there.
 class YOURNAMEHERE(Player):
     # Feel free to add variables here.
     # You don't need to, it might be helpful
 
 
     def __init__(self,  c):
-        role = "CHOSE YOUR ROLE" # You can replace this with Warrior or Thief or Mage or Monk
+        role = "CHOSE YOUR ROLE" # You need to replace this with Warrior or Thief or Mage or Monk
         super().__init__(self.__class__.__name__,role, c)
 
     # OVERRIDE THIS in your class!

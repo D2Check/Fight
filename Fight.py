@@ -441,7 +441,7 @@ class Fight(object):
             # costs 50 mana
         },
         "Mage": {
-            "dmg": [1,19],
+            "dmg": [10,10],
             "move_size": [1, 1, 2],
             "dmg_range": 4,
             "mana": 100,
@@ -462,7 +462,7 @@ if __name__ == "__main__":
            p1.name:0,
            p2.name:0
         }
-        games = 1000
+        games = 1
         while games > 0:
             # print(f"games: {games}")
             f = Fight(20)
@@ -470,7 +470,6 @@ if __name__ == "__main__":
                 p1,
                 p2
             ]
-
             f.add_players(players)
             # f.print_board()
             winner = f.fight()
