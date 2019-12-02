@@ -131,21 +131,24 @@ def get_sight(board, x, y, size, cross_centers):
                         break
             ctr += 1
         # We have now found the 5 points we need
-
-        small_triangle = (triangle_details["corner_player"]["x"],
-                          triangle_details["corner_player"]["y"],
-                          triangle_details["cross_corners"][0][0],
-                          triangle_details["cross_corners"][0][1],
-                          triangle_details["cross_corners"][1][0],
-                          triangle_details["cross_corners"][1][1],
-                          )
-        large_triangle = (triangle_details["corner_player"]["x"],
-                          triangle_details["corner_player"]["y"],
-                          triangle_details["outside_corners"][0][0],
-                          triangle_details["outside_corners"][0][1],
-                          triangle_details["outside_corners"][1][0],
-                          triangle_details["outside_corners"][1][1],
-                          )
+        try:
+            small_triangle = (triangle_details["corner_player"]["x"],
+                              triangle_details["corner_player"]["y"],
+                              triangle_details["cross_corners"][0][0],
+                              triangle_details["cross_corners"][0][1],
+                              triangle_details["cross_corners"][1][0],
+                              triangle_details["cross_corners"][1][1],
+                              )
+            large_triangle = (triangle_details["corner_player"]["x"],
+                              triangle_details["corner_player"]["y"],
+                              triangle_details["outside_corners"][0][0],
+                              triangle_details["outside_corners"][0][1],
+                              triangle_details["outside_corners"][1][0],
+                              triangle_details["outside_corners"][1][1],
+                              )
+        except:
+            print(triangle_details)
+            continue
         # for every location on the board
         for testy in range(size):
             for testx in range(size):
@@ -162,10 +165,13 @@ def get_sight(board, x, y, size, cross_centers):
 size = 20
 board = [["."] * size for i in range(size)]
 board[0][0] = "1"
-board[9][5] = "2"
-board = add_cross(board, 12, 12)
-board = add_cross(board, 4, 3)
+p2x,p2y = 5,13
+board[p2x][p2y] = "2"
 print_board(board, 20)
-cross_centers = [(12, 12), (4, 3)]
-board = get_sight(board, 9, 5, 20, cross_centers)
+cross_centers = [(12, 12), (4, 3),(17,2),(4,14)]
+for cr in cross_centers:
+    x,y = cr
+    board = add_cross(board,x,y)
+board = get_sight(board, p2x, p2y, 20, cross_centers)
 print_board(board, 20)
+
