@@ -53,7 +53,6 @@ def isInside(x1, y1, x2, y2, x3, y3, x, y):
 
 
 def get_sight(board, x, y, size, cross_centers):
-    dont_change = ["1","2","#"]
     for center in cross_centers:
         tx, ty = center
         # Get the points of the cross
@@ -131,6 +130,8 @@ def get_sight(board, x, y, size, cross_centers):
                         triangle_details["outside_corners"].append((j, k))
                         break
             ctr += 1
+        # We have now found the 5 points we need
+
         small_triangle = (triangle_details["corner_player"]["x"],
                           triangle_details["corner_player"]["y"],
                           triangle_details["cross_corners"][0][0],
@@ -145,13 +146,15 @@ def get_sight(board, x, y, size, cross_centers):
                           triangle_details["outside_corners"][1][0],
                           triangle_details["outside_corners"][1][1],
                           )
+        # for every location on the board
         for testy in range(size):
             for testx in range(size):
                 ax,ay,bx,by,cx,cy = small_triangle
                 inside_small = isInside(ax,ay,bx,by,cx,cy,testx,testy)
                 ax, ay, bx, by, cx, cy = large_triangle
                 inside_large = isInside(ax, ay, bx, by, cx, cy, testx, testy)
-                if inside_large and not inside_small and board[testx][testy] not in dont_change:
+                # if that point is inside the large triangle and not inside the small triangle we cant see there
+                if inside_large and not inside_small and board[testx][testy]:
                     board[testx][testy] = " "
     return board
 
@@ -159,10 +162,10 @@ def get_sight(board, x, y, size, cross_centers):
 size = 20
 board = [["."] * size for i in range(size)]
 board[0][0] = "1"
-board[15][5] = "2"
+board[9][5] = "2"
 board = add_cross(board, 12, 12)
 board = add_cross(board, 4, 3)
 print_board(board, 20)
 cross_centers = [(12, 12), (4, 3)]
-board = get_sight(board, 15, 5, 20, cross_centers)
+board = get_sight(board, 9, 5, 20, cross_centers)
 print_board(board, 20)
