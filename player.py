@@ -75,4 +75,4 @@ class Player(object):
         print(board_string)
 
     def __str__(self):
-        return f"{self.me} ({self.x},{self.y}) h:{self.health} m:{self.mana}"
+        return f"P{self.me} ({self.x},{self.y}) h:{self.health} m:{self.mana}"

@@ -2,6 +2,10 @@ import random
 import players
 from player import Player
 import sys
+import time
+import colorama
+colorama.init()
+
 
 import_player = lambda name: getattr(
     __import__('players.' + name, fromlist=['']), name)
@@ -17,7 +21,7 @@ class Fight(object):
     manas = None
     moves_index = None
     turns = 0
-
+    last_events = None
 
     def __init__(self, size: int) -> None:
         """
@@ -69,16 +73,17 @@ class Fight(object):
         Used in testing
         :return: None
         """
-        board_string = self.get_stats_of_game()
-        board_string += "\n  "
+        board_string = f"{str(self.players[1])}, {str(self.players[2])}"
+        board_string += "\n   "
 
-        board_string += "".join(["{:2}".format(e) for e in range(0, 20)])
+        board_string += " ".join(["{:<2}".format(e) for e in range(0, 20)])
         board_string += "\n"
         for y in range(0, self.board_size):
             board_string += "{:2} ".format(y)
             for x in range(0, self.board_size):
-                board_string += self.board[x][y] + " "
+                board_string += self.board[x][y] + "  "
             board_string += "\n"
+        board_string += f'Last Events: P1 {self.last_events[0]}, P2 {self.last_events[1]}'
         print(board_string)
 
     def add_players(self, players_to_add: list) -> None:
@@ -125,13 +130,6 @@ class Fight(object):
         # UPDATE THE PLAYERS OF EACH OTHERS STATS
         self.update_players()
 
-    def get_stats_of_game(self) -> str:
-        """
-        String that contains stats on players
-        :return: str
-        """
-        return f"{str(self.players[1])} {str(self.players[2])}"
-
     def update_players(self):
         """
         Update each player about themselves and the other player
@@ -146,13 +144,15 @@ class Fight(object):
         p1.update_stats(p1.to_dict(), p2.to_dict())
         p2.update_stats(p2.to_dict(), p1.to_dict())
 
-    def fight(self):
+    def fight(self, print_board=0, interval=0):
         """
         Main game loop.
         Set's self.winner upon finishing.
         Calls
         - update_players 2x
         - make_move
+        :param print_board: if the board should be printed (0/False = no, 1/True = yes, 2 =  yes, but don't overwrite console lines)
+        :param interval: interval between rounds in seconds
         :return (Player's character, Amount of turns):
         """
         # print(self.players)
@@ -166,7 +166,7 @@ class Fight(object):
         # MAIN GAME LOOP
         timeout = False
         while self.healths[1] > 0 and self.healths[2] > 0:
-
+            self.last_events = ['-', '-']
             self.turns += 1
             self.update_players()
             if self.next_player_turn == 1:
@@ -180,12 +180,21 @@ class Fight(object):
                 self.make_move(p2, 2)
                 self.next_player_turn -= 1
             self.update_players()
-            if self.turns == 4500: # each player gets half of these turns to kill the other player.
+            if self.turns == 4500:  # each player gets half of these turns to kill the other player.
                 # There's a long explanation for how I ended up at 3500 turns but, long story short,
                 # if you move literally randomly and just "aim" intelligently, the amount of turns both players could
                 # need will essentially NEVER be higher than 3500
                 timeout = True
                 break
+            if print_board:
+                self.print_board()
+            time.sleep(interval)
+            if print_board == 1:
+                # move cursor back up
+                print(f"\x1b[{25}A")
+                print(f"\x1b[{21}D")
+                # clear console
+                print("\x1b[2J")
         # SOMEONE HAS WON
         if timeout:
             # print("QUIT DUE TO TIMEOUT")
@@ -292,8 +301,8 @@ class Fight(object):
 
         if attack == 0:
             # up
-
             # print(f"{me} attack up")
+            self.last_events[index - 1] = 'attacked up'
 
             i = new_y
             while len(targets) < attack_size:
@@ -306,6 +315,8 @@ class Fight(object):
         elif attack == 1:
             # right
             # print(f"{me} attack right")
+            self.last_events[index - 1] = 'attacked right'
+
             i = new_x
             while len(targets) < attack_size:
                 i += 1
@@ -316,9 +327,9 @@ class Fight(object):
 
         elif attack == 2:
             # print(f"{me} attack down")
+            # down
+            self.last_events[index - 1] = 'attacked down'
 
-            # DOWN
-            # print(f"size {attack_size}")
             i = new_y
             while len(targets) < attack_size:
                 i += 1
@@ -329,6 +340,7 @@ class Fight(object):
         elif attack == 3:
             # left
             # print(f"{me} attack left")
+            self.last_events[index - 1] = 'attacked left'
 
             i = new_x
             while len(targets) < attack_size:
@@ -359,11 +371,13 @@ class Fight(object):
                 # THIS PERFORMS THE ACTUAL DMG
                 self.healths[enemy] -= dmg
                 # print(self.healths)
+                self.last_events[enemy - 1] = 'took damage'
 
                 # print(f"Player{enemy} got hit for {dmg}")
                 # print(self.healths)
         else:
             if self.manas[me] >= 50:
+                self.last_events[index - 1] = 'used skill'
                 if player.role == "Monk":
                     # print("heal used")
                     # HEAL FOR HEAL AMOUNT
@@ -441,7 +455,7 @@ class Fight(object):
             # costs 50 mana
         },
         "Mage": {
-            "dmg": [10,10],
+            "dmg": [10, 10],
             "move_size": [1, 1, 2],
             "dmg_range": 4,
             "mana": 100,
@@ -452,6 +466,8 @@ class Fight(object):
         },
 
     }
+
+
 if __name__ == "__main__":
     # all = ["Filth","Pummel","Rshields","Xyf"]
     all = ["Pummel"]
@@ -459,8 +475,8 @@ if __name__ == "__main__":
         p1 = import_player(p)("1")
         p2 = import_player("Timekeeper")("2")
         wins = {
-           p1.name:0,
-           p2.name:0
+            p1.name: 0,
+            p2.name: 0
         }
         games = 1
         while games > 0:
@@ -472,11 +488,10 @@ if __name__ == "__main__":
             ]
             f.add_players(players)
             # f.print_board()
-            winner = f.fight()
+            winner = f.fight(print_board=True, interval=0.3)
             if winner is not None:
                 wins[winner[0]] += 1
             # print(f"player {winner[0]} wins!")
             # print(f"game: {games} in turns: {winner[1]}")
             games -= 1
         print(wins)
-
