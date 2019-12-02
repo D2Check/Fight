@@ -57,7 +57,7 @@ def get_sight(board, x, y, size, cross_centers):
     for center in cross_centers:
         centx, centy = center
         # Get the points of the cross
-        pnts = [[centx + 1, centy], [centx, centy + 1], [centx - 1, centy], [centx, centy - 1]]
+        pnts = [(centx + 1, centy), (centx, centy + 1), (centx - 1, centy), (centx, centy - 1)]
         to_check = [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
         pnts_check = [tuple(e) for e in pnts]
         touching = False
@@ -196,7 +196,10 @@ def get_sight(board, x, y, size, cross_centers):
         else:
             # some points ARE touching
             # print("Points are touching")
+            # print(f"player at ({x},{y})")
+            # print(pnts)
             up, down, left, right = False, False, False, False
+
             me = board[x][y]
             if (x - 1, y) in pnts:
                 left = True
@@ -248,7 +251,7 @@ board = [["."] * size for i in range(size)]
 board[0][0] = "1"
 p2x, p2y = 5, 5
 board[p2x][p2y] = "2"
-cross_centers = [(4, 3)]
+cross_centers = [(4, 3),(6,6)]
 for cr in cross_centers:
     x, y = cr
     board = add_cross(board, x, y)

@@ -120,7 +120,7 @@ if __name__ == '__main__':
                 ' ' * 30, end='\r')
         if result.ready():
             break
-        time.sleep(0.1)
+        time.sleep(0.05)
     print('\n')
 
     # print performance stat
