@@ -81,7 +81,7 @@ class Timekeeper(Player):
 
         if self.boardsize is None:
             self.boardsize = len(board)
-        if self.turns == 1 or self.turns % 2 == 0:
+        if self.turns == 1 or self.turns % 3 == 0:
             self.set_goal(x, y, ex, ey)
         tx,ty = self.goal
         if y == ty:
@@ -154,6 +154,7 @@ class Timekeeper(Player):
                 self.turns_since_tele = 0
         if 0 <= chosen_move_size <= movesize:
             return move_direction, attack_direction, chosen_move_size
+
 
     def can_I_tele(self):
         if self.mana >= 50:
