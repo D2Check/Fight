@@ -6,6 +6,54 @@ import time
 import colorama
 colorama.init()
 
+roles = {
+        # "CLASS":{
+        #   "move_size": the MAX spaces you can move,
+        #               it rotates, so for thief, if you moved up to three spaces last time
+        #               you can only move a max of 1 for the next 2 turns
+        #   "dmg": min,max dmg you do if you attack the player
+        #   "dmg_range": your attacks will go "this far" in the direction you choose
+        #   "health: Starting health
+        #   "mana": Starting mana if thats a thing
+        # },
+        "Thief": {
+            "move_size": [1, 1, 3],
+            "dmg": [4, 14],
+            "dmg_range": 1,
+            "health": 100,
+            "mana": 0,
+
+        },
+        "Warrior": {
+            "dmg": [8, 10],
+            "move_size": [1, 1, 2],
+            "dmg_range": 1,
+            "health": 100,
+            "mana": 0,
+        },
+        "Monk": {
+            "dmg": [2, 8],
+            "move_size": [1, 2],
+            "dmg_range": 2,
+            "mana": 100,
+            "health": 100,
+            "heal": 43  # Your action will heal you
+
+            # costs 50 mana
+        },
+        "Mage": {
+            "dmg": [10, 10],
+            "move_size": [1, 1, 2],
+            "dmg_range": 4,
+            "mana": 100,
+            "health": 60
+            # don't get hit
+            # Your action will teleport you to a random corner that the enemy isn't in
+            # costs 50 mana
+        },
+
+    }
+
 
 import_player = lambda name: getattr(
     __import__('players.' + name, fromlist=['']), name)
@@ -95,6 +143,7 @@ class Fight(object):
         :param players_to_add: list of players
         :return: None
         """
+        global roles
         # STARTING LOCATIONS
         players_to_add[0].x, players_to_add[0].y = 0, 0
         players_to_add[1].x, players_to_add[1].y = self.board_size - \
@@ -110,16 +159,16 @@ class Fight(object):
         i = 1
         for player in players_to_add[0:]:
             new_players.append(player)
-            new_healths.append(self.roles[player.role]["health"])
-            player.health = self.roles[player.role]["health"]
-            new_mana.append(self.roles[player.role]["mana"])
-            player.mana = self.roles[player.role]["mana"]
+            new_healths.append(roles[player.role]["health"])
+            player.health = roles[player.role]["health"]
+            new_mana.append(roles[player.role]["mana"])
+            player.mana = roles[player.role]["mana"]
 
             self.set_space(player.x, player.y, player.me)
 
             # TODO Allow classes to choose when to move farther
             new_moves_index.append(random.randint(
-                0, len(self.roles[player.role]["move_size"]) - 1))
+                0, len(roles[player.role]["move_size"]) - 1))
             i += 1
         # SET Fight's VARIABLES
         self.players = new_players
@@ -207,6 +256,7 @@ class Fight(object):
             return self.players[1].name, self.turns
 
     def make_move(self, player: Player, index: int) -> None:
+        global roles
         #
         # SETUP
         #
@@ -224,10 +274,10 @@ class Fight(object):
 
         # DATA TO SEND THE PLAYER
         tempboard = [row[:] for row in self.board]  # faster than deepcopy
-        allowable_size = self.roles[player.role]["move_size"][int(
+        allowable_size = roles[player.role]["move_size"][int(
             self.moves_index[me])]
         self.moves_index[me] = (
-            self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
+            self.moves_index[me] + 1) % (len(roles[player.role]["move_size"]) - 1)
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
         move, attack, movesize = player.get_move(
@@ -295,7 +345,7 @@ class Fight(object):
         #
         # ATTACK HAPPENS HERE
         #
-        attack_size = self.roles[player.role]["dmg_range"]
+        attack_size = roles[player.role]["dmg_range"]
         skill = False
         targets = []
 
@@ -365,7 +415,7 @@ class Fight(object):
             if self.players[enemy].me in targets:
                 # print("hit")
                 # HOW MUCH DMG THE DO THIS TURN
-                min, max = self.roles[player.role]['dmg']
+                min, max = roles[player.role]['dmg']
                 dmg = random.randint(min, max)
                 # print(self.healths)
                 # THIS PERFORMS THE ACTUAL DMG
@@ -381,7 +431,7 @@ class Fight(object):
                 if player.role == "Monk":
                     # print("heal used")
                     # HEAL FOR HEAL AMOUNT
-                    self.healths[me] += self.roles["Monk"]["heal"]
+                    self.healths[me] += roles["Monk"]["heal"]
                     if self.healths[me] > 100:
                         self.healths[me] = 100
                 elif player.role == "Mage":
@@ -418,54 +468,6 @@ class Fight(object):
         player.y = y
         self.board[player.x][player.y] = player.me
         self.update_players()
-
-    roles = {
-        # "CLASS":{
-        #   "move_size": the MAX spaces you can move,
-        #               it rotates, so for thief, if you moved up to three spaces last time
-        #               you can only move a max of 1 for the next 2 turns
-        #   "dmg": min,max dmg you do if you attack the player
-        #   "dmg_range": your attacks will go "this far" in the direction you choose
-        #   "health: Starting health
-        #   "mana": Starting mana if thats a thing
-        # },
-        "Thief": {
-            "move_size": [1, 1, 3],
-            "dmg": [4, 14],
-            "dmg_range": 1,
-            "health": 100,
-            "mana": 0,
-
-        },
-        "Warrior": {
-            "dmg": [8, 10],
-            "move_size": [1, 1, 2],
-            "dmg_range": 1,
-            "health": 100,
-            "mana": 0,
-        },
-        "Monk": {
-            "dmg": [2, 8],
-            "move_size": [1, 2],
-            "dmg_range": 2,
-            "mana": 100,
-            "health": 100,
-            "heal": 43  # Your action will heal you
-
-            # costs 50 mana
-        },
-        "Mage": {
-            "dmg": [10, 10],
-            "move_size": [1, 1, 2],
-            "dmg_range": 4,
-            "mana": 100,
-            "health": 60
-            # don't get hit
-            # Your action will teleport you to a random corner that the enemy isn't in
-            # costs 50 mana
-        },
-
-    }
 
 
 if __name__ == "__main__":
