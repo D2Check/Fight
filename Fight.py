@@ -470,7 +470,7 @@ class Fight(object):
 
 if __name__ == "__main__":
     # all = ["Filth","Pummel","Rshields","Xyf"]
-    all = ["Pummel"]
+    all = ["Filth"]
     for p in all:
         p1 = import_player(p)("1")
         p2 = import_player("Timekeeper")("2")
@@ -488,7 +488,7 @@ if __name__ == "__main__":
             ]
             f.add_players(players)
             # f.print_board()
-            winner = f.fight(print_board=True, interval=0.3)
+            winner = f.fight(print_board=True, interval=0.2)
             if winner is not None:
                 wins[winner[0]] += 1
             # print(f"player {winner[0]} wins!")

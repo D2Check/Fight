@@ -81,7 +81,7 @@ class Timekeeper(Player):
 
         if self.boardsize is None:
             self.boardsize = len(board)
-        if self.turns == 1 or self.turns % 3 == 0:
+        if self.turns == 1 or self.turns % 2 == 0:
             self.set_goal(x, y, ex, ey)
         tx,ty = self.goal
         if y == ty:
