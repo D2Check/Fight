@@ -96,7 +96,7 @@ def get_sight(board, x, y, size, cross_centers):
                     save = i
 
             # for those 2 points, draw a line that goes from player out of the board
-            # TODO this will not work when the player is directly below a cross
+
 
             # This dict is the point of this function. It will save the details of the large and small triangles, as well
             # as the slope and y_intercept for the lines
@@ -249,7 +249,7 @@ def get_sight(board, x, y, size, cross_centers):
 size = 20
 board = [["."] * size for i in range(size)]
 board[0][0] = "1"
-p2x, p2y = 5, 5
+p2x, p2y = 5, 0
 board[p2x][p2y] = "2"
 cross_centers = [(4, 3),(6,6)]
 for cr in cross_centers:

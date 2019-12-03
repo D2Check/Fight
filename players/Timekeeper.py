@@ -70,7 +70,7 @@ class Timekeeper(Player):
         self.y = y  # YOUR Y
         ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
         # print(f"enemy is at ({ex},{ey})")
-        # movesize is how far you can move this turn. you can chose to move 0 >= choice <= movesize
+        # movesize is how far you can move this turn. you can chose to move 0 <= choice <= movesize
         move_direction = 0
         attack_direction = 0
         chosen_move_size = 1
