@@ -46,13 +46,11 @@ class Player(object):
     def to_dict(self):
         return {
             "role"  :self.role,
-            "x"     :self.x,
-            "y"     :self.y,
             "health":self.health,
             "mana"  :self.mana,
         }
 
-    def update_stats(self,me,enemy,start):
+    def update_stats(self,me,enemy):
         self.enemy_stats = enemy
         self.my_stats = me
         # Fight keeps track of both players health and mana independently. This is for YOU.

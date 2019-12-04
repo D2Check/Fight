@@ -249,12 +249,16 @@ def get_sight(board, x, y, size, cross_centers):
 size = 20
 board = [["."] * size for i in range(size)]
 board[0][0] = "1"
-p2x, p2y = 5, 0
+p2x, p2y = 5, 2
 board[p2x][p2y] = "2"
 cross_centers = [(4, 3),(6,6)]
 for cr in cross_centers:
     x, y = cr
     board = add_cross(board, x, y)
+board[6][3] = "x"
 print_board(board, 20)
-board = get_sight(board, p2x, p2y, 20, cross_centers)
-print_board(board, 20)
+for x in range(p2x,p2x+1):
+    for y in range(p2y+1,p2y+4):
+        print(board[x][y])
+# board = get_sight(board, p2x, p2y, 20, cross_centers)
+# print_board(board, 20)

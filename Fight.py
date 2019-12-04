@@ -1,18 +1,19 @@
 import random
-import players
 from player import Player
 import sys
 import time
 import colorama
-import multiprocessing
-colorama.init()
+from itertools import permutations
+import math
 
+colorama.init()
 
 import_player = lambda name: getattr(
     __import__('players.' + name, fromlist=['']), name)
 
 
 class Fight(object):
+    cross_centers = None
     winner = None
     board = None
     board_size = None
@@ -84,7 +85,8 @@ class Fight(object):
             for x in range(0, self.board_size):
                 board_string += self.board[x][y] + "  "
             board_string += "\n"
-        board_string += f'Last Events: P1 {self.last_events[0]}, P2 {self.last_events[1]}'
+        if self.last_events is not None:
+            board_string += f'Last Events: P1 {self.last_events[0]}, P2 {self.last_events[1]}'
         print(board_string)
 
     def add_players(self, players_to_add: list) -> None:
@@ -99,7 +101,7 @@ class Fight(object):
         # STARTING LOCATIONS
         players_to_add[0].x, players_to_add[0].y = 0, 0
         players_to_add[1].x, players_to_add[1].y = self.board_size - \
-            1, self.board_size - 1
+                                                   1, self.board_size - 1
 
         # WHAT WILL BE USED TO KEEP Fight AUTHORITATIVE OVER PLAYER OBJECTS
         new_players = [" "]
@@ -131,7 +133,7 @@ class Fight(object):
         # UPDATE THE PLAYERS OF EACH OTHERS STATS
         self.update_players()
 
-    def update_players(self,start=False):
+    def update_players(self):
         """
         Update each player about themselves and the other player
         :return:
@@ -142,8 +144,8 @@ class Fight(object):
             # THIS ENSURES THAT FIGHT ALWAYS CONTROLS HEALTH / MANA
             self.players[i].health = self.healths[i]
             self.players[i].mana = self.manas[i]
-        p1.update_stats(p1.to_dict(), p2.to_dict(),start)
-        p2.update_stats(p2.to_dict(), p1.to_dict(),start)
+        p1.update_stats(p1.to_dict(), p2.to_dict())
+        p2.update_stats(p2.to_dict(), p1.to_dict())
 
     def fight(self, print_board=0, interval=0):
         """
@@ -207,6 +209,30 @@ class Fight(object):
             self.winner = self.players[1].name
             return self.players[1].name, self.turns
 
+    def __area_of_triangle(self, x1, y1, x2, y2, x3, y3):
+        return abs((x1 * (y2 - y3) + x2 * (y3 - y1)
+                    + x3 * (y1 - y2)) / 2.0)
+
+    def __is_inside_triangle(self, x1, y1, x2, y2, x3, y3, x, y):
+        # Calculate area of triangle ABC
+        A = self.__area_of_triangle(x1, y1, x2, y2, x3, y3)
+
+        # Calculate area of triangle PBC
+        A1 = self.__area_of_triangle(x, y, x2, y2, x3, y3)
+
+        # Calculate area of triangle PAC
+        A2 = self.__area_of_triangle(x1, y1, x, y, x3, y3)
+
+        # Calculate area of triangle PAB
+        A3 = self.__area_of_triangle(x1, y1, x2, y2, x, y)
+
+        # Check if sum of A1, A2 and A3
+        # is same as A
+        if (A == A1 + A2 + A3):
+            return True
+        else:
+            return False
+
     def make_move(self, player: Player, index: int) -> None:
         #
         # SETUP
@@ -225,10 +251,9 @@ class Fight(object):
 
         # DATA TO SEND THE PLAYER
         tempboard = [row[:] for row in self.board]  # faster than deepcopy
-        allowable_size = self.roles[player.role]["move_size"][int(
-            self.moves_index[me])]
-        self.moves_index[me] = (
-            self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
+        tempboard = self.get_sight(tempboard,current_x,current_y)
+        allowable_size = self.roles[player.role]["move_size"][int(self.moves_index[me])]
+        self.moves_index[me] = (self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
 
@@ -288,7 +313,7 @@ class Fight(object):
             new_x = current_x
             new_y = current_y
 
-        if self.board[new_x][new_y] == "1" or self.board[new_x][new_y] == "2":
+        if self.board[new_x][new_y] == "1" or self.board[new_x][new_y] == "2" or self.board[new_x][new_y] == "#":
             # TRIED TO MOVE ONTO A PLAYER, STAY STILL
             # print(f"{index} invalid move onto player")
 
@@ -322,7 +347,11 @@ class Fight(object):
                 if i < 0:
                     break
                 # print(f"adding ({newx},{i}) {self.board[newx][i]}")
-                targets.append(self.board[new_x][i])
+                c = self.board[new_x][i]
+                if c == "#":
+                    break
+                else:
+                    targets.append(c)
 
         elif attack == 1:
             # right
@@ -335,7 +364,11 @@ class Fight(object):
                 if i > self.board_size - 1:
                     break
                 # print(f"adding ({i},{newy}) {self.board[i][newy]}")
-                targets.append(self.board[i][new_y])
+                c = self.board[i][new_y]
+                if c == "#":
+                    break
+                else:
+                    targets.append(c)
 
         elif attack == 2:
             # print(f"{me} attack down")
@@ -348,7 +381,11 @@ class Fight(object):
                 if i > self.board_size - 1:
                     break
                 # print(f"adding ({newx},{i}) {self.board[newx][i]}")
-                targets.append(self.board[new_x][i])
+                c = self.board[new_x][i]
+                if c == "#":
+                    break
+                else:
+                    targets.append(c)
         elif attack == 3:
             # left
             # print(f"{me} attack left")
@@ -360,7 +397,11 @@ class Fight(object):
                 if i < 0:
                     break
                 # print(f"adding ({i},{newy}) {self.board[i][newy]}")
-                targets.append(self.board[i][new_y])
+                c = self.board[i][new_y]
+                if c == "#":
+                    break
+                else:
+                    targets.append(c)
         elif attack == 4:
             #
             # THIS IS A SPECIAL CASE DO NOT TARGET
@@ -414,6 +455,200 @@ class Fight(object):
                     player.x, player.y = new_x, new_y
                 self.manas[me] -= 50
         return
+
+    def get_sight(self, board, x, y):
+        cross_centers = self.cross_centers
+        size = self.board_size
+        for center in cross_centers:
+            centx, centy = center
+            # Get the points of the cross
+            pnts = [(centx + 1, centy), (centx, centy + 1), (centx - 1, centy), (centx, centy - 1)]
+            to_check = [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+            pnts_check = [tuple(e) for e in pnts]
+            touching = False
+            if set(pnts_check) & set(to_check):
+                for pnt in pnts:
+                    try:
+                        to_check.remove(tuple(pnt))
+                    except:
+                        continue
+                if len(to_check) <= 2:
+                    touching = True
+            if not touching:
+                d = None
+                to_elim = None
+                # eliminate the closest point
+                for pnt in pnts:
+                    px, py = pnt
+                    dist = math.sqrt((px - x) ** 2 + (py - y) ** 2)
+                    if d is None or dist < d:
+                        d = dist
+                        to_elim = pnt
+                pnts.remove(to_elim)
+
+                # for all permutations of points, find the largest triangle made with the player
+                perms = permutations(pnts, 2)
+                area = None
+                save = None
+                for i in list(perms):
+                    a, b = i
+                    ax, ay = a
+                    bx, by = b
+                    cx, cy = x, y
+                    curr_area = self.__area_of_triangle(ax, ay, bx, by, cx, cy)
+                    if area is None or curr_area >= area:
+                        area = curr_area
+                        save = i
+
+                # for those 2 points, draw a line that goes from player out of the board
+
+                # This dict is the point of this function. It will save the details of the large and small triangles, as well
+                # as the slope and y_intercept for the lines
+                triangle_details = {
+                    "corner_player": {
+                        "x": x,
+                        "y": y
+                    },
+                    "cross_corners": [],
+                    "line_details": [],
+                    "outside_corners": [],
+                    "direction": None
+                }
+                # print(centx,x)
+                if centx > x:
+                    triangle_details["direction"] = 1
+                else:
+                    triangle_details["direction"] = -1
+                # We need the slope and y_intercept for each of those pnts to the player
+                for corner in save:
+                    tx, ty = corner
+
+                    if tx - x != 0:
+                        slope = (ty - y) / (tx - x)
+                        y_int = y - (slope * x)
+                        line = (slope, y_int)
+                        triangle_details["line_details"].append(line)
+                        temp = (tx, ty)
+                        triangle_details["cross_corners"].append(temp)
+                    else:
+                        # print(triangle_details["direction"])
+                        # print("This happens")
+                        if triangle_details["direction"] == -1:
+                            slope = float(sys.maxsize)
+                            y_int = float(sys.maxsize)
+                        else:
+                            slope = float(sys.maxsize)
+                            y_int = float(sys.maxsize)
+                        line = (slope, y_int)
+                        temp = (tx, ty)
+                        triangle_details["cross_corners"].append(temp)
+                        triangle_details["line_details"].append(line)
+                        if centy > y:
+                            for i in range(size - 1, centy, -1):
+                                board[x][i] = " "
+                        else:
+                            # print("yes to here")
+                            pass
+                            # for i in range(0,centy):
+                            #     board[x][i] = " "
+                # using that slope and y_intercept. find 1 point each line that is OUTSIDE of the board
+                ctr = 0
+                for cross_pnt in triangle_details["cross_corners"]:
+                    tx, ty = cross_pnt
+                    slope, y_int = triangle_details["line_details"][ctr]
+                    if triangle_details["direction"] == -1:
+                        for j in range(0, -51, -1):
+                            k = j * slope + y_int
+                            if k.is_integer():
+                                triangle_details["outside_corners"].append((j, k))
+                                break
+                    else:
+                        for j in range(size, size + 50):
+                            k = j * slope + y_int
+                            if k.is_integer():
+                                triangle_details["outside_corners"].append((j, k))
+                                break
+                    ctr += 1
+                # We have now found the 5 points we need
+                small_triangle = (triangle_details["corner_player"]["x"],
+                                  triangle_details["corner_player"]["y"],
+                                  triangle_details["cross_corners"][0][0],
+                                  triangle_details["cross_corners"][0][1],
+                                  triangle_details["cross_corners"][1][0],
+                                  triangle_details["cross_corners"][1][1],
+                                  )
+                large_triangle = (triangle_details["corner_player"]["x"],
+                                  triangle_details["corner_player"]["y"],
+                                  triangle_details["outside_corners"][0][0],
+                                  triangle_details["outside_corners"][0][1],
+                                  triangle_details["outside_corners"][1][0],
+                                  triangle_details["outside_corners"][1][1],
+                                  )
+
+                # print(triangle_details)
+                # for every location on the board
+                for testy in range(size):
+                    for testx in range(size):
+                        ax, ay, bx, by, cx, cy = small_triangle
+                        inside_small = self.__is_inside_triangle(ax, ay, bx, by, cx, cy, testx, testy)
+                        ax, ay, bx, by, cx, cy = large_triangle
+                        inside_large = self.__is_inside_triangle(ax, ay, bx, by, cx, cy, testx, testy)
+                        # if that point is inside the large triangle and not inside the small triangle we cant see there
+                        if inside_large and not inside_small and board[testx][testy]:
+                            board[testx][testy] = " "
+
+            else:
+                # some points ARE touching
+                # print("Points are touching")
+                # print(f"player at ({x},{y})")
+                # print(pnts)
+                up, down, left, right = False, False, False, False
+
+                me = board[x][y]
+                if (x - 1, y) in pnts:
+                    left = True
+                if (x + 1, y) in pnts:
+                    right = True
+                if (x, y + 1) in pnts:
+                    down = True
+                if (x, y - 1) in pnts:
+                    up = True
+                # print(up,down,left,right)
+                if down and left:
+                    for k in range(y, size):
+                        for j in range(x, -1, -1):
+                            board[j][k] = " "
+                    board[x - 1][y] = "#"
+                    board[x - 1][y + 1] = "#"
+                    board[x][y + 1] = "#"
+                    board[x][y] = me
+
+                if right and down:
+                    for k in range(y, size):
+                        for j in range(x, size):
+                            board[j][k] = " "
+                    board[x + 1][y] = "#"
+                    board[x + 1][y + 1] = "#"
+                    board[x][y + 1] = "#"
+                    board[x][y] = me
+                if up and right:
+                    for k in range(y, -1, -1):
+                        for j in range(x, size):
+                            board[j][k] = " "
+                    board[x + 1][y] = "#"
+                    board[x + 1][y - 1] = "#"
+                    board[x][y - 1] = "#"
+                    board[x][y] = me
+                if up and left:
+                    for k in range(y, -1, -1):
+                        for j in range(x, -1, -1):
+                            board[j][k] = " "
+                    board[x - 1][y] = "#"
+                    board[x - 1][y - 1] = "#"
+                    board[x][y - 1] = "#"
+                    board[x][y] = me
+        return board
+
 
     def set_player_location(self, player: Player, x: int, y: int) -> None:
         """
@@ -479,43 +714,84 @@ class Fight(object):
 
     }
 
+    def __add_cross(self, x, y):
+
+        assert self.board is not None
+        if self.cross_centers is None:
+            self.cross_centers = []
+        self.cross_centers.append((x,y))
+        self.board[x][y] = "#"
+        self.board[x + 1][y] = "#"
+        self.board[x][y + 1] = "#"
+        self.board[x - 1][y] = "#"
+        self.board[x][y - 1] = "#"
+
+    def add_crosses(self):
+        assert self.board is not None
+        cross_centers = []
+        number_of_crosses = random.randint(2, 4)
+        # print(number_of_crosses)
+        for i in range(number_of_crosses):
+            # print(cross_centers)
+            if len(cross_centers) == 0:
+                x = random.randint(2, self.board_size - 3)
+                cross_centers.append(x)
+            else:
+                n = len(cross_centers)
+                while n == len(cross_centers):
+                    x = random.randint(2, self.board_size - 3)
+                    for k in cross_centers:
+                        if abs(k - x) < 3:
+                            break
+                    else:
+                        cross_centers.append(x)
+        for x in cross_centers:
+            self.__add_cross(x, random.randint(2, self.board_size - 3))
+
 
 if __name__ == "__main__":
-    max_wins = 0
-    stats = [0,0]
-    for tele_health in range(1,60,2):
-        for rounds_attack_limit in range(0,6):
-            # all = ["Filth","Pummel","Xyf"]
-            all = ["Pummel"]
-            for p in all:
-                p1 = import_player(p)("1")
-                p2 = import_player("Timekeeper")("2")
-                p2.tele_health = tele_health
-                p2.rounds_attacked_limit = rounds_attack_limit
-                wins = {
-                    p1.name: 0,
-                    p2.name: 0
-                }
-                games = 1
-                # print(f"{p1.name} and {p2.name}")
-                while games > 0:
-                    # print(f"games: {games}")
-                    f = Fight(20)
-                    players = [
-                        p1,
-                        p2
-                    ]
-                    f.add_players(players)
-                    # f.print_board()
-                    winner = f.fight()
-                    if winner is not None:
-                        wins[winner[0]] += 1
-                    # print(f"player {winner[0]} wins!")
-                    # print(f"game: {games} in turns: {winner[1]}")
-                    games -= 1
-                # print(wins)
-                if wins['Timekeeper'] > max_wins:
-                    stats = [tele_health,rounds_attack_limit]
-                    max_wins = wins['Timekeeper']
-    print(max_wins)
-    print(stats)
+    # max_wins = 0
+    # stats = [0,0]
+    # for tele_health in range(1,60,2):
+    #     for rounds_attack_limit in range(0,6):
+    #         # all = ["Filth","Pummel","Xyf"]
+    #         all = ["Pummel"]
+    #         for p in all:
+    #             p1 = import_player(p)("1")
+    #             p2 = import_player("Timekeeper")("2")
+    #             p2.tele_health = tele_health
+    #             p2.rounds_attacked_limit = rounds_attack_limit
+    #             wins = {
+    #                 p1.name: 0,
+    #                 p2.name: 0
+    #             }
+    #             games = 1
+    #             # print(f"{p1.name} and {p2.name}")
+    #             while games > 0:
+    #                 # print(f"games: {games}")
+    #                 f = Fight(20)
+    #                 players = [
+    #                     p1,
+    #                     p2
+    #                 ]
+    #                 f.add_players(players)
+    #                 # f.print_board()
+    #                 winner = f.fight()
+    #                 if winner is not None:
+    #                     wins[winner[0]] += 1
+    #                 # print(f"player {winner[0]} wins!")
+    #                 # print(f"game: {games} in turns: {winner[1]}")
+    #                 games -= 1
+    #             # print(wins)
+    #             if wins['Timekeeper'] > max_wins:
+    #                 stats = [tele_health,rounds_attack_limit]
+    #                 max_wins = wins['Timekeeper']
+    # print(max_wins)
+    # print(stats)
+    p1 = import_player("Xyf")("1")
+    p2 = import_player("Timekeeper")("2")
+    f = Fight(20)
+    players = [p1, p2]
+    f.add_players(players)
+    f.add_crosses()
+    f.print_board()
