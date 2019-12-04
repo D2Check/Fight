@@ -56,8 +56,8 @@ class Xyf(Player):
         self.x = x  # YOUR X
         self.y = y  # YOUR Y
         # movesize is how far you can move this turn. you can chose to move 0 >= choice <= movesize
-        move_direction = 0
-        attack_direction = 0
+        move_direction = random.randint(0, 3)
+        attack_direction = random.randint(0, 3)
         chosen_move_size = movesize
         #
         # EDIT DOWN
@@ -65,71 +65,7 @@ class Xyf(Player):
         if self.boardsize is None:
             self.boardsize = len(board)
 
-        ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
-        # print(f"Pummel Im at ({x},{y}) E at ({ex},{ey})")
-        if y == ey:
-            # print("Pummel move y=ey")
-            if x < ex:
-                # print("Pummel move right")
-                move_direction = 1
-            else:
-                # print("Pummel move left")
-                move_direction = 3
-        elif x == ex:
-            # print("Pummel move x=ex")
-            if y < ey:
-                # print("Pummel move down")
-                move_direction = 2
-            else:
-                # print("Pummel move up")
-                move_direction = 0
-        elif y > ey:
-            # print("Pummel moving up")
-            move_direction = 0
-        elif ey > y:
-            # print("Pummel moving down")
-            move_direction = 2
 
-        newx = x
-        newy = y
-        if move_direction == 0:
-            newy = y - movesize
-        elif move_direction == 1:
-            newx = x + movesize
-        elif move_direction == 2:
-            newy = y + movesize
-        elif move_direction == 3:
-            newx = x - movesize
-
-        if board[newx][newy] == self.enemy:
-            chosen_move_size = 0
-            newx = x
-            newy = y
-
-        if newy == ey:
-            # print("Pummel attack y=ey")
-            if newx < ex:
-                # print("Pummel attack right")
-                attack_direction = 1
-            else:
-                # print("Pummel move left")
-                attack_direction = 3
-        elif newx == ex:
-            # print("Pummel attack x=ex")
-            if newy < ey:
-                # print("Pummel attack down")
-                attack_direction = 2
-            else:
-                # print("Pummel attack up")
-                attack_direction = 0
-        elif newy > ey:
-            # print("Pummel attacking up")
-            attack_direction = 0
-        elif ey > newy:
-            # print("Pummel attacking down")
-            attack_direction = 2
-        # print(f"{self.name} {self.me}\n \tmoving {chosen_move_size} towards {move_direction} {self.sdirections[move_direction]}\n"
-        #       f"\tattacking {attack_direction} {self.sdirections[attack_direction]}")
         if 0 <= chosen_move_size <= movesize:
             # print("yes")
             return move_direction, attack_direction, chosen_move_size

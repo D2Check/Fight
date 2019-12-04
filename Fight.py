@@ -251,7 +251,8 @@ class Fight(object):
 
         # DATA TO SEND THE PLAYER
         tempboard = [row[:] for row in self.board]  # faster than deepcopy
-        tempboard = self.get_sight(tempboard,current_x,current_y)
+        tempboard = self.__get_sight(tempboard, current_x, current_y)
+
         allowable_size = self.roles[player.role]["move_size"][int(self.moves_index[me])]
         self.moves_index[me] = (self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
         # print(f"move:{movesize},allowable:{allowable_size}")
@@ -456,7 +457,7 @@ class Fight(object):
                 self.manas[me] -= 50
         return
 
-    def get_sight(self, board, x, y):
+    def __get_sight(self, board, x, y):
         cross_centers = self.cross_centers
         size = self.board_size
         for center in cross_centers:
@@ -464,12 +465,11 @@ class Fight(object):
             # Get the points of the cross
             pnts = [(centx + 1, centy), (centx, centy + 1), (centx - 1, centy), (centx, centy - 1)]
             to_check = [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
-            pnts_check = [tuple(e) for e in pnts]
             touching = False
-            if set(pnts_check) & set(to_check):
+            if set(pnts) & set(to_check):
                 for pnt in pnts:
                     try:
-                        to_check.remove(tuple(pnt))
+                        to_check.remove(pnt)
                     except:
                         continue
                 if len(to_check) <= 2:
@@ -557,35 +557,50 @@ class Fight(object):
                     tx, ty = cross_pnt
                     slope, y_int = triangle_details["line_details"][ctr]
                     if triangle_details["direction"] == -1:
-                        for j in range(0, -51, -1):
+                        # print("HERE")
+                        # for j in range(0, -901, -1):
+                        j = 0
+                        k = j * slope + y_int
+                        while not k.is_integer():
+                            j-=1
                             k = j * slope + y_int
-                            if k.is_integer():
-                                triangle_details["outside_corners"].append((j, k))
-                                break
+
+                        triangle_details["outside_corners"].append((j, k))
                     else:
-                        for j in range(size, size + 50):
+                        # print("THERE")
+                        j = size
+                        k = j * slope + y_int
+                        while not k.is_integer():
+                            j += 1
                             k = j * slope + y_int
-                            if k.is_integer():
-                                triangle_details["outside_corners"].append((j, k))
-                                break
+
+                        triangle_details["outside_corners"].append((j, k))
                     ctr += 1
                 # We have now found the 5 points we need
-                small_triangle = (triangle_details["corner_player"]["x"],
-                                  triangle_details["corner_player"]["y"],
-                                  triangle_details["cross_corners"][0][0],
-                                  triangle_details["cross_corners"][0][1],
-                                  triangle_details["cross_corners"][1][0],
-                                  triangle_details["cross_corners"][1][1],
-                                  )
-                large_triangle = (triangle_details["corner_player"]["x"],
-                                  triangle_details["corner_player"]["y"],
-                                  triangle_details["outside_corners"][0][0],
-                                  triangle_details["outside_corners"][0][1],
-                                  triangle_details["outside_corners"][1][0],
-                                  triangle_details["outside_corners"][1][1],
-                                  )
-
-                # print(triangle_details)
+                try:
+                    small_triangle = (triangle_details["corner_player"]["x"],
+                                      triangle_details["corner_player"]["y"],
+                                      triangle_details["cross_corners"][0][0],
+                                      triangle_details["cross_corners"][0][1],
+                                      triangle_details["cross_corners"][1][0],
+                                      triangle_details["cross_corners"][1][1],
+                                      )
+                    large_triangle = (triangle_details["corner_player"]["x"],
+                                      triangle_details["corner_player"]["y"],
+                                      triangle_details["outside_corners"][0][0],
+                                      triangle_details["outside_corners"][0][1],
+                                      triangle_details["outside_corners"][1][0],
+                                      triangle_details["outside_corners"][1][1],
+                                      )
+                except:
+                    print(triangle_details)
+                    print()
+                    for o in range(self.board_size):
+                        for p in range(self.board_size):
+                            print(board[o][p],end="")
+                        print()
+                    print()
+                    break
                 # for every location on the board
                 for testy in range(size):
                     for testx in range(size):
@@ -794,4 +809,5 @@ if __name__ == "__main__":
     players = [p1, p2]
     f.add_players(players)
     f.add_crosses()
-    f.print_board()
+    # f.print_board()
+    print(f.fight())
