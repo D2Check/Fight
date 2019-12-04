@@ -4,6 +4,7 @@ from player import Player
 import sys
 import time
 import colorama
+import multiprocessing
 colorama.init()
 
 roles = {
@@ -280,11 +281,22 @@ class Fight(object):
             self.moves_index[me] + 1) % (len(roles[player.role]["move_size"]) - 1)
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
-        move, attack, movesize = player.get_move(
-            tempboard, player.x, player.y, allowable_size)
+
+        movesize = 0
+        move = 0
+        attack = 0
+        # print("Attemping to get a move")
+        start = time.time()
+        move, attack, movesize = player.get_move(tempboard, player.x, player.y, allowable_size)
+        end = time.time()
+        if end - start > .005:
+            self.healths[me] = 0
+            print(f"player {me} took too long, they lose")
         if 0 > movesize > allowable_size:
+            # print("failed move_size")
             self.healths[me] = 0
             # print("Player {} decided to cheat. They lose.")
+        # print("Yay")
         #
         # MOVEMENT HAPPENS HERE
         #
@@ -471,8 +483,8 @@ class Fight(object):
 
 
 if __name__ == "__main__":
-    # all = ["Filth","Pummel","Rshields","Xyf"]
-    all = ["Pummel"]
+    # all = ["Filth","Pummel","Xyf"]
+    all = ["Filth"]
     for p in all:
         p1 = import_player(p)("1")
         p2 = import_player("Timekeeper")("2")
@@ -480,7 +492,8 @@ if __name__ == "__main__":
             p1.name: 0,
             p2.name: 0
         }
-        games = 1
+        games = 100
+        print(f"{p1.name} and {p2.name}")
         while games > 0:
             # print(f"games: {games}")
             f = Fight(20)
@@ -490,7 +503,7 @@ if __name__ == "__main__":
             ]
             f.add_players(players)
             # f.print_board()
-            winner = f.fight(print_board=True, interval=0.3)
+            winner = f.fight()
             if winner is not None:
                 wins[winner[0]] += 1
             # print(f"player {winner[0]} wins!")

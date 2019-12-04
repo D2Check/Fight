@@ -155,6 +155,7 @@ class Timekeeper(Player):
         if 0 <= chosen_move_size <= movesize:
             return move_direction, attack_direction, chosen_move_size
 
+
     def can_I_tele(self):
         if self.mana >= 50:
             return True

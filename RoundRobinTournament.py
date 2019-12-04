@@ -7,7 +7,7 @@ from multiprocessing import Pool, Value, Manager, Lock
 import time
 import sys
 
-games_per_matchup = 1000
+games_per_matchup = 500
 consec_wins_before_skip = 200
 
 
