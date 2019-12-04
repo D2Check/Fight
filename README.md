@@ -9,7 +9,7 @@
 * You can use helper functions and class fields if you want.
 
 ## Rules
-
+* You will only see parts of the board
 * Fight is played turn by turn automatically.
 * There's a random sized square board with sizes ranging from 15-35.
 * 1 player spawns in the lower right corner, the other spawns in the upper left corner.
