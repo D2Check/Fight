@@ -278,7 +278,7 @@ class Fight(object):
         allowable_size = roles[player.role]["move_size"][int(
             self.moves_index[me])]
         self.moves_index[me] = (
-            self.moves_index[me] + 1) % (len(roles[player.role]["move_size"]) - 1)
+            self.moves_index[me] + 1) % len(roles[player.role]["move_size"])
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
 
