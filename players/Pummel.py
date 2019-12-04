@@ -2,11 +2,13 @@ import random
 import math
 import sys
 from player import Player
+
 UP = 0
 RIGHT = 1
 DOWN = 2
 LEFT = 3
 SPELL = 4
+
 
 class Pummel(Player):
     # Monk
@@ -16,8 +18,7 @@ class Pummel(Player):
         role = "Monk"
         # print(f"Pummel {c}")
 
-        super().__init__(self.__class__.__name__,role, c)
-
+        super().__init__(self.__class__.__name__, role, c)
 
     # OVERRIDE THIS in your class!
     # board - current state of the board
@@ -107,7 +108,7 @@ class Pummel(Player):
         elif ey > newy:
             # print("Pummel attacking down")
             attack_direction = 2
-        if self.health <= 20 and self.mana >= 50 :
+        if self.health <= 57 and self.mana >= 50:
             attack_direction = 4
         if 0 <= chosen_move_size <= movesize:
             # print("yes")

@@ -1,5 +1,6 @@
 from player import Player
 import random
+import math
 
 UP = 0
 RIGHT = 1
@@ -9,8 +10,11 @@ SPELL = 4
 
 class Timekeeper(Player):
     turns = 0
-    turns_since_tele = -1
+    rounds_attacked = 0
+    rounds_attacked_limit = None
+    tele_health = None
     boardsize = None
+    distances = []
     directions = {
         "up": 0,
         "right": 1,
@@ -18,18 +22,21 @@ class Timekeeper(Player):
         "left": 3
     }
     goal = None
-    have_teled = False
     sdirections = ["up", "right", "down", "left", "spell"]
+    healths = []
 
     def __init__(self, c):
+
         role = "Mage"
         # print(f"Timekeeper {c}")
         super().__init__(self.__class__.__name__,role, c)
 
 
+
+
     def get_metrics(self, x, y, ex, ey):
         # print(f"dist abs({ex} - {x}) + abs({ey}-{y})")
-        distance_to_enemy = abs(ex - x) + abs(ey - y)
+        distance_to_enemy = math.sqrt((ex - x)**2 + (ey - y)**2)
         return (distance_to_enemy, self.can_enemy_target_me(x, y, ex, ey), self.can_I_target_enemy(x, y, ex, ey),(ex,ey))
         # return 0,0, self.can_I_target_enemy(x, y,ex,ey)
 
@@ -54,34 +61,42 @@ class Timekeeper(Player):
                 print(f"{k} is invalid")
             # print(k,me,dout)
 
-    # OVERRIDE THIS in your class!
-    # board - current state of the board
-    # x,y - your current row and column on the board
-    # You can move a MAX of movesize in a SINGLE direction
-    # 0-3 MOVES a player,
-    # Moves: 0-Up, 1-Right, 2-Down, 3-Left
-    # 0-3 ATTACKS in that direction,
-    #   if you are mage 4 moves you randomly (not near your enemy),
-    #   if you are monk 4 gets health back
     def get_move(self, board, x, y, movesize):
+        if self.tele_health is None:
+            if self.enemy_stats['role'] == "Thief":
+                self.tele_health = 21
+                self.rounds_attacked_limit = 0
+            elif self.enemy_stats['role'] == "Warrior":
+                self.tele_health = 27
+                self.rounds_attacked_limit = 3
+            else:
+                self.tele_health = 25
+                self.rounds_attacked_limit = 2
         global UP,DOWN,LEFT,RIGHT,SPELL
+        self.healths.append(self.health)
         self.turns += 1
+        if len(self.healths) > 3:
+            if self.healths[self.turns-2] != self.healths[self.turns-1]:
+                self.rounds_attacked += 1
+            else:
+                self.rounds_attacked = 0
         self.x = x  # YOUR X
         self.y = y  # YOUR Y
         ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
+        distance_to_enemy = math.sqrt((ex - x)**2 + (ey - y)**2)
+        self.distances.append(round(distance_to_enemy,1))
+        chosen_move_size = 1
+        if distance_to_enemy > 7:
+            chosen_move_size = movesize
+
         # print(f"enemy is at ({ex},{ey})")
-        # movesize is how far you can move this turn. you can chose to move 0 <= choice <= movesize
         move_direction = 0
         attack_direction = 0
-        chosen_move_size = 1
-        ## YOUR CODE HERE
-        if self.have_teled:
-            self.turns_since_tele += 1
         ex, ey = self.enemy_stats['x'], self.enemy_stats['y']
 
         if self.boardsize is None:
             self.boardsize = len(board)
-        if self.turns == 1 or self.turns % 3 == 0:
+        if self.turns == 1 or self.turns % 3 == 0 or distance_to_enemy <= 3:
             self.set_goal(x, y, ex, ey)
         tx,ty = self.goal
         if y == ty:
@@ -110,16 +125,18 @@ class Timekeeper(Player):
         newx = x
         newy = y
         if move_direction == 0:
-            newy = y - 1
+            newy = y - chosen_move_size
         elif move_direction == 1:
-            newx = x + 1
+            newx = x + chosen_move_size
         elif move_direction == 2:
-            newy = y + 1
+            newy = y + chosen_move_size
         elif move_direction == 3:
-            newx = x - 1
+            newx = x - chosen_move_size
 
         if newx == tx and newy == ty:
             chosen_move_size = 0
+            newx = x
+            newy = y
         # print(f"x,y = ({newx},{newy}) ex,ey({ex},{ey})")
         if newy == ey:
             # print("Timekeeper attack newy=ey")
@@ -143,23 +160,11 @@ class Timekeeper(Player):
         elif ey > newy:
             # print("Timekeeper attacking down")
             attack_direction = DOWN
-        if self.health <= 30 and self.can_I_tele():
-            if self.have_teled:
-                if self.turns_since_tele > 11:
-                    attack_direction = SPELL
-                    self.turns_since_tele = 0
-            else:
-                self.have_teled = True
+        if self.mana >= 50 and self.rounds_attacked > self.rounds_attacked_limit and self.health <= self.tele_health:
                 attack_direction = SPELL
-                self.turns_since_tele = 0
+        # print(self.distances)
         if 0 <= chosen_move_size <= movesize:
             return move_direction, attack_direction, chosen_move_size
-
-
-    def can_I_tele(self):
-        if self.mana >= 50:
-            return True
-        return False
 
     # Feel free to add helper functions here.
     # You don't need to, it might be helpful

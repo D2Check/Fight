@@ -52,7 +52,7 @@ class Player(object):
             "mana"  :self.mana,
         }
 
-    def update_stats(self,me,enemy):
+    def update_stats(self,me,enemy,start):
         self.enemy_stats = enemy
         self.my_stats = me
         # Fight keeps track of both players health and mana independently. This is for YOU.

@@ -131,7 +131,7 @@ class Fight(object):
         # UPDATE THE PLAYERS OF EACH OTHERS STATS
         self.update_players()
 
-    def update_players(self):
+    def update_players(self,start=False):
         """
         Update each player about themselves and the other player
         :return:
@@ -142,8 +142,8 @@ class Fight(object):
             # THIS ENSURES THAT FIGHT ALWAYS CONTROLS HEALTH / MANA
             self.players[i].health = self.healths[i]
             self.players[i].mana = self.manas[i]
-        p1.update_stats(p1.to_dict(), p2.to_dict())
-        p2.update_stats(p2.to_dict(), p1.to_dict())
+        p1.update_stats(p1.to_dict(), p2.to_dict(),start)
+        p2.update_stats(p2.to_dict(), p1.to_dict(),start)
 
     def fight(self, print_board=0, interval=0):
         """
@@ -181,7 +181,7 @@ class Fight(object):
                 self.make_move(p2, 2)
                 self.next_player_turn -= 1
             self.update_players()
-            if self.turns == 4500:  # each player gets half of these turns to kill the other player.
+            if self.turns == 9000:  # each player gets half of these turns to kill the other player.
                 # There's a long explanation for how I ended up at 3500 turns but, long story short,
                 # if you move literally randomly and just "aim" intelligently, the amount of turns both players could
                 # need will essentially NEVER be higher than 3500
@@ -239,9 +239,9 @@ class Fight(object):
         start = time.time()
         move, attack, movesize = player.get_move(tempboard, player.x, player.y, allowable_size)
         end = time.time()
-        if end - start > .005:
+        if end - start > .02:
             self.healths[me] = 0
-            print(f"player {me} took too long, they lose")
+            print(f"{player.name} took too long, they lose")
         if 0 > movesize > allowable_size:
             # print("failed move_size")
             self.healths[me] = 0
@@ -481,30 +481,41 @@ class Fight(object):
 
 
 if __name__ == "__main__":
-    # all = ["Filth","Pummel","Xyf"]
-    all = ["Filth"]
-    for p in all:
-        p1 = import_player(p)("1")
-        p2 = import_player("Timekeeper")("2")
-        wins = {
-            p1.name: 0,
-            p2.name: 0
-        }
-        games = 100
-        print(f"{p1.name} and {p2.name}")
-        while games > 0:
-            # print(f"games: {games}")
-            f = Fight(20)
-            players = [
-                p1,
-                p2
-            ]
-            f.add_players(players)
-            # f.print_board()
-            winner = f.fight()
-            if winner is not None:
-                wins[winner[0]] += 1
-            # print(f"player {winner[0]} wins!")
-            # print(f"game: {games} in turns: {winner[1]}")
-            games -= 1
-        print(wins)
+    max_wins = 0
+    stats = [0,0]
+    for tele_health in range(1,60,2):
+        for rounds_attack_limit in range(0,6):
+            # all = ["Filth","Pummel","Xyf"]
+            all = ["Pummel"]
+            for p in all:
+                p1 = import_player(p)("1")
+                p2 = import_player("Timekeeper")("2")
+                p2.tele_health = tele_health
+                p2.rounds_attacked_limit = rounds_attack_limit
+                wins = {
+                    p1.name: 0,
+                    p2.name: 0
+                }
+                games = 1
+                # print(f"{p1.name} and {p2.name}")
+                while games > 0:
+                    # print(f"games: {games}")
+                    f = Fight(20)
+                    players = [
+                        p1,
+                        p2
+                    ]
+                    f.add_players(players)
+                    # f.print_board()
+                    winner = f.fight()
+                    if winner is not None:
+                        wins[winner[0]] += 1
+                    # print(f"player {winner[0]} wins!")
+                    # print(f"game: {games} in turns: {winner[1]}")
+                    games -= 1
+                # print(wins)
+                if wins['Timekeeper'] > max_wins:
+                    stats = [tele_health,rounds_attack_limit]
+                    max_wins = wins['Timekeeper']
+    print(max_wins)
+    print(stats)
