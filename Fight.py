@@ -287,11 +287,13 @@ class Fight(object):
         attack = 0
         # print("Attemping to get a move")
         start = time.time()
-        move, attack, movesize = player.get_move(tempboard, player.x, player.y, allowable_size)
-        end = time.time()
-        if end - start > .005:
+        move, attack, movesize = player.get_move(
+            tempboard, player.x, player.y, allowable_size)
+        duration = time.time() - start
+        if duration > .005:
             self.healths[me] = 0
-            print(f"player {me} took too long, they lose")
+            print(
+                f"player {me} ({player.name}) took too long ({duration:.5f} seconds), they lose" + " " * 20)
         if 0 > movesize > allowable_size:
             # print("failed move_size")
             self.healths[me] = 0
@@ -483,16 +485,15 @@ class Fight(object):
 
 
 if __name__ == "__main__":
-    # all = ["Filth","Pummel","Xyf"]
-    all = ["Filth"]
+    all = ["Filth", "Pummel", "Rshields", "Xyf"]
     for p in all:
         p1 = import_player(p)("1")
-        p2 = import_player("Timekeeper")("2")
+        p2 = import_player('Codec')("2")
         wins = {
             p1.name: 0,
             p2.name: 0
         }
-        games = 100
+        games = 5
         print(f"{p1.name} and {p2.name}")
         while games > 0:
             # print(f"games: {games}")
@@ -503,7 +504,7 @@ if __name__ == "__main__":
             ]
             f.add_players(players)
             # f.print_board()
-            winner = f.fight()
+            winner = f.fight(print_board=False)
             if winner is not None:
                 wins[winner[0]] += 1
             # print(f"player {winner[0]} wins!")

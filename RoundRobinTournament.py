@@ -62,6 +62,7 @@ def worker(matchups):
                 with lock:
                     total_games_skipped.value += games_per_matchup - games_count
                 break
+    print(f'worker finished with following matchups: {matchups}' + ' '*30)
 
 
 def worker_init(l, tgp, tgs, pc, gw, gp):
