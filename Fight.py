@@ -5,6 +5,9 @@ import time
 import colorama
 from itertools import permutations
 import math
+import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
+import numpy as np
 
 colorama.init()
 
@@ -101,7 +104,7 @@ class Fight(object):
         # STARTING LOCATIONS
         players_to_add[0].x, players_to_add[0].y = 0, 0
         players_to_add[1].x, players_to_add[1].y = self.board_size - \
-                                                   1, self.board_size - 1
+            1, self.board_size - 1
 
         # WHAT WILL BE USED TO KEEP Fight AUTHORITATIVE OVER PLAYER OBJECTS
         new_players = [" "]
@@ -253,8 +256,10 @@ class Fight(object):
         tempboard = [row[:] for row in self.board]  # faster than deepcopy
         tempboard = self.__get_sight(tempboard, current_x, current_y)
 
-        allowable_size = self.roles[player.role]["move_size"][int(self.moves_index[me])]
-        self.moves_index[me] = (self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
+        allowable_size = self.roles[player.role]["move_size"][int(
+            self.moves_index[me])]
+        self.moves_index[me] = (
+            self.moves_index[me] + 1) % (len(self.roles[player.role]["move_size"]) - 1)
         # print(f"move:{movesize},allowable:{allowable_size}")
         # GET THEIR FEEDBACK
 
@@ -263,7 +268,8 @@ class Fight(object):
         attack = 0
         # print("Attemping to get a move")
         start = time.time()
-        move, attack, movesize = player.get_move(tempboard, player.x, player.y, allowable_size)
+        move, attack, movesize = player.get_move(
+            tempboard, player.x, player.y, allowable_size)
         end = time.time()
         if end - start > .02:
             self.healths[me] = 0
@@ -463,7 +469,8 @@ class Fight(object):
         for center in cross_centers:
             centx, centy = center
             # Get the points of the cross
-            pnts = [(centx + 1, centy), (centx, centy + 1), (centx - 1, centy), (centx, centy - 1)]
+            pnts = [(centx + 1, centy), (centx, centy + 1),
+                    (centx - 1, centy), (centx, centy - 1)]
             to_check = [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
             touching = False
             if set(pnts) & set(to_check):
@@ -562,7 +569,7 @@ class Fight(object):
                         j = 0
                         k = j * slope + y_int
                         while not k.is_integer():
-                            j-=1
+                            j -= 1
                             k = j * slope + y_int
 
                         triangle_details["outside_corners"].append((j, k))
@@ -597,7 +604,7 @@ class Fight(object):
                     print()
                     for o in range(self.board_size):
                         for p in range(self.board_size):
-                            print(board[o][p],end="")
+                            print(board[o][p], end="")
                         print()
                     print()
                     break
@@ -605,9 +612,11 @@ class Fight(object):
                 for testy in range(size):
                     for testx in range(size):
                         ax, ay, bx, by, cx, cy = small_triangle
-                        inside_small = self.__is_inside_triangle(ax, ay, bx, by, cx, cy, testx, testy)
+                        inside_small = self.__is_inside_triangle(
+                            ax, ay, bx, by, cx, cy, testx, testy)
                         ax, ay, bx, by, cx, cy = large_triangle
-                        inside_large = self.__is_inside_triangle(ax, ay, bx, by, cx, cy, testx, testy)
+                        inside_large = self.__is_inside_triangle(
+                            ax, ay, bx, by, cx, cy, testx, testy)
                         # if that point is inside the large triangle and not inside the small triangle we cant see there
                         if inside_large and not inside_small and board[testx][testy]:
                             board[testx][testy] = " "
@@ -662,8 +671,25 @@ class Fight(object):
                     board[x - 1][y - 1] = "#"
                     board[x][y - 1] = "#"
                     board[x][y] = me
-        return board
 
+        string_board = np.array(board).T
+        float_board = np.zeros(string_board.shape + (3,))
+        switch = {
+            ' ': (0, 0, 0),
+            '.': (0.5, 0.5, 0.5),
+            '#': (0.2, 0.2, 0.2),
+            '1': (1, 0, 0),
+            '2': (0, 1, 0)
+        }
+        for index, value in np.ndenumerate(string_board):
+            x, y = index
+            float_board[x][y] = switch[value]
+        fig, ax = plt.subplots(1)
+        ax.imshow(float_board)
+        for center in cross_centers:
+            ax.add_patch(Circle(center, radius=0.4, color='blue'))
+        plt.show(fig)
+        return board
 
     def set_player_location(self, player: Player, x: int, y: int) -> None:
         """
@@ -734,7 +760,7 @@ class Fight(object):
         assert self.board is not None
         if self.cross_centers is None:
             self.cross_centers = []
-        self.cross_centers.append((x,y))
+        self.cross_centers.append((x, y))
         self.board[x][y] = "#"
         self.board[x + 1][y] = "#"
         self.board[x][y + 1] = "#"
