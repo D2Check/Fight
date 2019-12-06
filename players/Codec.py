@@ -3,7 +3,8 @@ import numpy as np
 import math
 import statistics
 """ import cv2
-import matplotlib.pyplot as plt """
+import matplotlib.pyplot as plt
+from matplotlib.patches import Arrow, Circle """
 from player import Player
 from Fight import roles
 UP = 0
@@ -25,6 +26,8 @@ class Codec(Player):
     last_health = 0
     last_position = None
     consecutive_minus_positions = 0
+    strength_comparison = 0
+    max_distance = 0
 
     def __init__(self, c):
         role = "Mage"
@@ -50,21 +53,15 @@ class Codec(Player):
 
     def can_target_position(self, role, x, y, ex, ey):
         global UP, DOWN, LEFT, RIGHT
-        dmg_range = roles[role]['dmg_range']
-        if x == ex and abs(y - ey) <= dmg_range:
-            return UP
-        if y == ey and abs(ex - x) <= dmg_range:
-            return RIGHT
-        if x == ex and abs(ey + y) <= dmg_range:
-            return DOWN
-        if y == ey and abs(ex - x) <= dmg_range:
-            return LEFT
-        return -1
+        target_aligned = self.is_target_aligned(x, y, ex, ey)
+        if target_aligned == -1 or target_aligned > roles[role]['dmg_range']:
+            return -1
+        return self.get_direction(x, y, ex, ey)
 
     def is_target_aligned(self, x, y, ex, ey):
-        if x == ex or y == ey or x == ex or y == ey:
+        if x == ex or y == ey:
             return abs(x - ex) + abs(y - ey)
-        return 0
+        return -1
 
     def get_possible_move_positions(self, x, y, max_move_size):
         poss_move_pos = [(x, y)]
@@ -115,8 +112,21 @@ class Codec(Player):
         # move_direction = RIGHT for example
         #
 
+        # only gets executed at the first move
         if self.boardsize is None:
             self.boardsize = len(board)
+
+            # get max distance the players could have
+            self.max_distance = self.calculate_distance(
+                0, 0, self.boardsize, self.boardsize)
+
+            # calculate how strong the enemy is compared to the player
+            enemy_strength = statistics.mean(
+                roles[self.enemy_stats['role']]['dmg'])
+            if self.enemy_stats['role'] == 'Monk':
+                enemy_strength *= 1 + (roles['Monk']['heal'] * 2 / 100)
+            self.strength_comparison = statistics.mean(
+                roles[self.role]['dmg']) / enemy_strength
 
         # this part tries to figure out on what move index the enemy current is
         if self.enemy_move_index == -1:
@@ -147,38 +157,39 @@ class Codec(Player):
         poss_enemy_move_pos = self.get_possible_move_positions(
             self.enemy_stats['x'], self.enemy_stats['y'], enemy_move_size)
 
-        # get max distance the players could have
-        max_distance = self.calculate_distance(
-            0, 0, self.boardsize, self.boardsize)
-
         # generate score grid for how good each position is
         score_grid = np.zeros((self.boardsize, self.boardsize))
-        strength_comparison = statistics.mean(roles[self.role]['dmg']) / statistics.mean(
-            roles[self.enemy_stats['role']]['dmg'])
         for index, value in np.ndenumerate(score_grid):
             x, y = index
-            # if enemy can be attacked form position
+
+            # don't need to calulate the score if it isn't near both players
+            if self.calculate_distance(x,y, self.enemy_stats['x'], self.enemy_stats['y']) > 6 \
+                and self.calculate_distance(x,y, self.x, self.y) > 3:
+                continue
+            score_grid[x][y]+= 0.01
+            # if enemy can be attacked from position
             if self.can_target_position(self.role, x, y, self.enemy_stats['x'], self.enemy_stats['y']) != -1:
-                score_grid[x][y] += 1 * strength_comparison
+                score_grid[x][y] += 1 * self.strength_comparison
             else:
-                # if block is alined with target
-                is_aligned = self.is_target_aligned(
-                    x, y, self.enemy_stats['x'], self.enemy_stats['y'])
-                if is_aligned and is_aligned < roles[self.role]['dmg_range'] + 5:
-                    score_grid[x][y] += 0.9
+                # if block is aligned with target
+                if self.is_target_aligned(x, y, self.enemy_stats['x'], self.enemy_stats['y']) != -1:
+                    score_grid[x][y] += 0.1
 
-            score_grid[x][y] -= self.calculate_distance(
-                x, y, self.x, self.y) / max_distance / 10
-
-            # calculate in how many ways the player could be attacked
+            # how many ways the player could be attacked
+            possible_enemy_attacks = 0
+            # how many ways the player could attack
             possible_attacks = 0
             for poss_ex, poss_ey in poss_enemy_move_pos:
                 if self.can_target_position(self.enemy_stats['role'], poss_ex, poss_ey, x, y) != -1:
+                    possible_enemy_attacks += 1
+                if self.can_target_position(self.role, x, y, poss_ex, poss_ey) != -1:
                     possible_attacks += 1
-            score_grid[x][y] -= 3 / strength_comparison + \
-                possible_attacks / 3 if possible_attacks else 0
+            score_grid[x][y] -= 3 / self.strength_comparison + \
+                possible_enemy_attacks / 20 if possible_enemy_attacks else 0
+            #score_grid[x][y] += possible_attacks / 4
 
-            #score_grid[x][y] += self.calculate_distance(x,y, self.enemy_stats['x'], self.enemy_stats['y']) / max_distance /100
+            #score_grid[x][y] -= self.calculate_distance(x, y, self.x, self.y) / self.max_distance / 10
+            #score_grid[x][y] += self.calculate_distance(x,y, self.enemy_stats['x'], self.enemy_stats['y']) / self.max_distance /100
 
         # get the best goal position from score grid
         best_goal = None
@@ -196,22 +207,29 @@ class Codec(Player):
         for i, position in enumerate(poss_move_pos):
             score_move_pos[i] += score_grid[position[0]][position[1]]
             score_move_pos[i] -= self.calculate_distance(
-                *position, *best_goal) / max_distance
+                *position, *best_goal) / self.max_distance
         best_move_pos = poss_move_pos[np.argmax(score_move_pos)]
 
-        """ cv2_score_grid = np.copy(score_grid)
+        """ visual_score_grid = np.copy(score_grid)
         for i, score in enumerate(score_move_pos):
             move_pos = poss_move_pos[i]
-            cv2_score_grid[move_pos[0]][move_pos[1]] = score
-        cv2_score_grid = (cv2_score_grid + 5) / 10
-        cv2_score_grid[self.enemy_stats['x']][self.enemy_stats['y']] = 0
-        cv2_score_grid[self.x][self.y] = 1
-        cv2.imshow('frame', cv2_score_grid)
-        cv2.waitKey(1) """
+            visual_score_grid[move_pos[0]][move_pos[1]] = score
+        #visual_score_grid = (visual_score_grid + 5) / 10
+        #visual_score_grid[self.enemy_stats['x']][self.enemy_stats['y']] = 0
+        #visual_score_grid[self.x][self.y] = 1
+        visual_score_grid[0][0] = 1.5
+        visual_score_grid[self.boardsize - 1][self.boardsize - 1] = -3
+        fig, ax = plt.subplots(1)
+        ax.imshow(visual_score_grid.T)
+        ax.add_patch(Circle((self.x, self.y), radius=0.5, color='red'))
+        ax.add_patch(Circle(best_move_pos, radius=0.1, color='black'))
+        plt.show(fig)
+        # cv2.imshow('frame', visual_score_grid)
+        # cv2.waitKey(1) """
 
         # check if skill should be used
         if self.mana >= 50:
-            if score_grid[best_move_pos[0]][best_move_pos[1]] < -0.5:
+            if self.last_health > self.health and score_grid[best_move_pos[0]][best_move_pos[1]] < -0.5:
                 self.consecutive_minus_positions += 1
             else:
                 self.consecutive_minus_positions = 0
