@@ -65,7 +65,7 @@ class Timekeeper(Player):
     def get_move(self, board, x, y, movesize):
         global UP,DOWN,LEFT,RIGHT,SPELL
         chosen_move_size = movesize
-        move_direction = random.randint(0, 3)
+        move_direction = 3
         attack_direction = random.randint(0, 3)
 
         if 0 <= chosen_move_size <= movesize:

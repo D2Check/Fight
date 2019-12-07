@@ -44,7 +44,8 @@ class Fight(object):
         :param size: int
         """
         # print("setup")
-        coin_flip = random.randint(1, 2)
+        # coin_flip = random.randint(1, 2)
+        coin_flip = 2
         self.next_player_turn = coin_flip
         self.board = self.__build_board(size)
 
@@ -254,7 +255,7 @@ class Fight(object):
 
         # DATA TO SEND THE PLAYER
         tempboard = [row[:] for row in self.board]  # faster than deepcopy
-        tempboard = self.__get_sight(tempboard, current_x, current_y)
+        tempboard = self.__new_get_sight(tempboard, current_x, current_y)
 
         allowable_size = self.roles[player.role]["move_size"][int(
             self.moves_index[me])]
@@ -463,28 +464,38 @@ class Fight(object):
                 self.manas[me] -= 50
         return
 
-    def __get_sight(self, board, x, y):
+    def __new_get_sight(self, board, x, y):
         cross_centers = self.cross_centers
         size = self.board_size
         for center in cross_centers:
             centx, centy = center
+            # print(f"Working on ({centx},{centy})")
             # Get the points of the cross
             pnts = [(centx + 1, centy), (centx, centy + 1),
                     (centx - 1, centy), (centx, centy - 1)]
             to_check = [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
             touching = False
+            pnts_touching = []
             if set(pnts) & set(to_check):
                 for pnt in pnts:
+                    save = False
                     try:
                         to_check.remove(pnt)
+                        save = True
                     except:
                         continue
+                    if save:
+                        pnts_touching.append(pnt)
                 if len(to_check) <= 2:
                     touching = True
-            if not touching:
+            if touching:
+                # print("Yes touching")
+                save = pnts_touching
+            else:
+                # print("Not touching")
+
                 d = None
                 to_elim = None
-                # eliminate the closest point
                 for pnt in pnts:
                     px, py = pnt
                     dist = math.sqrt((px - x) ** 2 + (py - y) ** 2)
@@ -492,8 +503,6 @@ class Fight(object):
                         d = dist
                         to_elim = pnt
                 pnts.remove(to_elim)
-
-                # for all permutations of points, find the largest triangle made with the player
                 perms = permutations(pnts, 2)
                 area = None
                 save = None
@@ -506,189 +515,109 @@ class Fight(object):
                     if area is None or curr_area >= area:
                         area = curr_area
                         save = i
-
-                # for those 2 points, draw a line that goes from player out of the board
-
-                # This dict is the point of this function. It will save the details of the large and small triangles, as well
-                # as the slope and y_intercept for the lines
-                triangle_details = {
-                    "corner_player": {
-                        "x": x,
-                        "y": y
-                    },
-                    "cross_corners": [],
-                    "line_details": [],
-                    "outside_corners": [],
-                    "direction": None
+            triangle_details = {
+                "corner_player": {
+                    "x": x,
+                    "y": y
+                },
+                "cross_corners": [],
+                "vectors": [],
+                "outside_corners": [],
                 }
-                # print(centx,x)
-                if centx > x:
-                    triangle_details["direction"] = 1
-                else:
-                    triangle_details["direction"] = -1
-                # We need the slope and y_intercept for each of those pnts to the player
-                for corner in save:
-                    tx, ty = corner
+            for corner in save:
+                tx, ty = corner
+                temp = (tx, ty)
+                triangle_details["cross_corners"].append(temp)
+                # print(f"Adding {temp} as the corner")
+                vector = (x-tx,y-ty)
+                # print(f"Adding {vector} as the vector")
 
-                    if tx - x != 0:
-                        slope = (ty - y) / (tx - x)
-                        y_int = y - (slope * x)
-                        line = (slope, y_int)
-                        triangle_details["line_details"].append(line)
-                        temp = (tx, ty)
-                        triangle_details["cross_corners"].append(temp)
-                    else:
-                        # print(triangle_details["direction"])
-                        # print("This happens")
-                        if triangle_details["direction"] == -1:
-                            slope = float(sys.maxsize)
-                            y_int = float(sys.maxsize)
+                triangle_details['vectors'].append(vector)
+
+            ctr = 0
+            for cross_pnt in triangle_details["cross_corners"]:
+                tx, ty = cross_pnt
+                xchange,ychange = triangle_details["vectors"][ctr]
+                # print(f"Finding outside corners from ({x},{y}) with vector ({xchange},{ychange})")
+                newx = tx
+                newy = ty
+                while True:
+                    # if x >= tx:
+                    #     newx -=xchange
+                    # if y >= ty:
+                    #     newy -=ychange
+                    # else:
+                    #     newy += ychange
+                    newx -= xchange
+
+                    newy -= ychange
+                    if ychange == 0:
+                        # kill = True
+                        if xchange > 0:
+                            newy = -1
                         else:
-                            slope = float(sys.maxsize)
-                            y_int = float(sys.maxsize)
-                        line = (slope, y_int)
-                        temp = (tx, ty)
-                        triangle_details["cross_corners"].append(temp)
-                        triangle_details["line_details"].append(line)
-                        if centy > y:
-                            for i in range(size - 1, centy, -1):
-                                board[x][i] = " "
+                            newy = size
+                    if xchange == 0:
+                        # kill = True
+                        if ychange > 0:
+                            newy = -1
                         else:
-                            # print("yes to here")
-                            pass
-                            # for i in range(0,centy):
-                            #     board[x][i] = " "
-                # using that slope and y_intercept. find 1 point each line that is OUTSIDE of the board
-                ctr = 0
-                for cross_pnt in triangle_details["cross_corners"]:
-                    tx, ty = cross_pnt
-                    slope, y_int = triangle_details["line_details"][ctr]
-                    if triangle_details["direction"] == -1:
-                        # print("HERE")
-                        # for j in range(0, -901, -1):
-                        j = 0
-                        k = j * slope + y_int
-                        while not k.is_integer():
-                            j -= 1
-                            k = j * slope + y_int
+                            newy = size
 
-                        triangle_details["outside_corners"].append((j, k))
-                    else:
-                        # print("THERE")
-                        j = size
-                        k = j * slope + y_int
-                        while not k.is_integer():
-                            j += 1
-                            k = j * slope + y_int
+                    # print(f"Eval ({newx},{newy})")
+                    if (newx < 0 or newx>=size) or (newy < 0 or newy>=size):
+                        break
+                outside_corner = (newx,newy)
+                # print(f"Adding {outside_corner} as an outside corner")
 
-                        triangle_details["outside_corners"].append((j, k))
-                    ctr += 1
-                # We have now found the 5 points we need
-                try:
-                    small_triangle = (triangle_details["corner_player"]["x"],
-                                      triangle_details["corner_player"]["y"],
-                                      triangle_details["cross_corners"][0][0],
-                                      triangle_details["cross_corners"][0][1],
-                                      triangle_details["cross_corners"][1][0],
-                                      triangle_details["cross_corners"][1][1],
-                                      )
-                    large_triangle = (triangle_details["corner_player"]["x"],
-                                      triangle_details["corner_player"]["y"],
-                                      triangle_details["outside_corners"][0][0],
-                                      triangle_details["outside_corners"][0][1],
-                                      triangle_details["outside_corners"][1][0],
-                                      triangle_details["outside_corners"][1][1],
-                                      )
-                except:
-                    print(triangle_details)
-                    print()
-                    for o in range(self.board_size):
-                        for p in range(self.board_size):
-                            print(board[o][p], end="")
-                        print()
-                    print()
-                    break
-                # for every location on the board
-                for testy in range(size):
-                    for testx in range(size):
-                        ax, ay, bx, by, cx, cy = small_triangle
-                        inside_small = self.__is_inside_triangle(
-                            ax, ay, bx, by, cx, cy, testx, testy)
-                        ax, ay, bx, by, cx, cy = large_triangle
-                        inside_large = self.__is_inside_triangle(
-                            ax, ay, bx, by, cx, cy, testx, testy)
-                        # if that point is inside the large triangle and not inside the small triangle we cant see there
-                        if inside_large and not inside_small and board[testx][testy]:
-                            board[testx][testy] = " "
+                triangle_details['outside_corners'].append(outside_corner)
+                ctr += 1
+            # print(triangle_details)
+            small_triangle = (triangle_details["corner_player"]["x"],
+                              triangle_details["corner_player"]["y"],
+                              triangle_details["cross_corners"][0][0],
+                              triangle_details["cross_corners"][0][1],
+                              triangle_details["cross_corners"][1][0],
+                              triangle_details["cross_corners"][1][1],
+                              )
+            large_triangle = (triangle_details["corner_player"]["x"],
+                              triangle_details["corner_player"]["y"],
+                              triangle_details["outside_corners"][0][0],
+                              triangle_details["outside_corners"][0][1],
+                              triangle_details["outside_corners"][1][0],
+                              triangle_details["outside_corners"][1][1],
+                              )
+            for testy in range(size):
+                for testx in range(size):
+                    ax, ay, bx, by, cx, cy = small_triangle
+                    inside_small = self.__is_inside_triangle(
+                        ax, ay, bx, by, cx, cy, testx, testy)
+                    ax, ay, bx, by, cx, cy = large_triangle
+                    inside_large = self.__is_inside_triangle(
+                        ax, ay, bx, by, cx, cy, testx, testy)
+                    # if that point is inside the large triangle and not inside the small triangle we cant see there
+                    if inside_large and not inside_small and board[testx][testy]:
+                        board[testx][testy] = " "
+        # if kill:
+        #     string_board = np.array(board).T
+        #     float_board = np.zeros(string_board.shape + (3,))
+        #     switch = {
+        #         ' ': (0, 0, 0),
+        #         '.': (0.5, 0.5, 0.5),
+        #         '#': (0.2, 0.2, 0.2),
+        #         '1': (1, 0, 0),
+        #         '2': (0, 1, 0)
+        #     }
+        #     for index, value in np.ndenumerate(string_board):
+        #         x, y = index
+        #         float_board[x][y] = switch[value]
+        #     fig, ax = plt.subplots(1)
+        #     ax.imshow(float_board)
+        #     for center in cross_centers:
+        #         ax.add_patch(Circle(center, radius=0.4, color='blue'))
+        #     plt.show()
+        #     sys.exit()
 
-            else:
-                # some points ARE touching
-                # print("Points are touching")
-                # print(f"player at ({x},{y})")
-                # print(pnts)
-                up, down, left, right = False, False, False, False
-
-                me = board[x][y]
-                if (x - 1, y) in pnts:
-                    left = True
-                if (x + 1, y) in pnts:
-                    right = True
-                if (x, y + 1) in pnts:
-                    down = True
-                if (x, y - 1) in pnts:
-                    up = True
-                # print(up,down,left,right)
-                if down and left:
-                    for k in range(y, size):
-                        for j in range(x, -1, -1):
-                            board[j][k] = " "
-                    board[x - 1][y] = "#"
-                    board[x - 1][y + 1] = "#"
-                    board[x][y + 1] = "#"
-                    board[x][y] = me
-
-                if right and down:
-                    for k in range(y, size):
-                        for j in range(x, size):
-                            board[j][k] = " "
-                    board[x + 1][y] = "#"
-                    board[x + 1][y + 1] = "#"
-                    board[x][y + 1] = "#"
-                    board[x][y] = me
-                if up and right:
-                    for k in range(y, -1, -1):
-                        for j in range(x, size):
-                            board[j][k] = " "
-                    board[x + 1][y] = "#"
-                    board[x + 1][y - 1] = "#"
-                    board[x][y - 1] = "#"
-                    board[x][y] = me
-                if up and left:
-                    for k in range(y, -1, -1):
-                        for j in range(x, -1, -1):
-                            board[j][k] = " "
-                    board[x - 1][y] = "#"
-                    board[x - 1][y - 1] = "#"
-                    board[x][y - 1] = "#"
-                    board[x][y] = me
-
-        string_board = np.array(board).T
-        float_board = np.zeros(string_board.shape + (3,))
-        switch = {
-            ' ': (0, 0, 0),
-            '.': (0.5, 0.5, 0.5),
-            '#': (0.2, 0.2, 0.2),
-            '1': (1, 0, 0),
-            '2': (0, 1, 0)
-        }
-        for index, value in np.ndenumerate(string_board):
-            x, y = index
-            float_board[x][y] = switch[value]
-        fig, ax = plt.subplots(1)
-        ax.imshow(float_board)
-        for center in cross_centers:
-            ax.add_patch(Circle(center, radius=0.4, color='blue'))
-        plt.show(fig)
         return board
 
     def set_player_location(self, player: Player, x: int, y: int) -> None:
@@ -771,6 +700,7 @@ class Fight(object):
         assert self.board is not None
         cross_centers = []
         number_of_crosses = random.randint(2, 4)
+        # number_of_crosses = 1
         # print(number_of_crosses)
         for i in range(number_of_crosses):
             # print(cross_centers)
