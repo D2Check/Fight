@@ -645,7 +645,7 @@ class Fight(object):
         #   "mana": Starting mana if thats a thing
         # },
         "Thief": {
-            "move_size": [1, 1, 3],
+            "move_size": [1, 2, 2],
             "dmg": [4, 14],
             "dmg_range": 1,
             "health": 100,
