@@ -272,7 +272,7 @@ class Fight(object):
         move, attack, movesize = player.get_move(
             tempboard, player.x, player.y, allowable_size)
         end = time.time()
-        if end - start > .02:
+        if end - start > 1:
             self.healths[me] = 0
             print(f"{player.name} took too long, they lose")
         if 0 > movesize > allowable_size:
@@ -323,7 +323,7 @@ class Fight(object):
 
         if self.board[new_x][new_y] == "1" or self.board[new_x][new_y] == "2" or self.board[new_x][new_y] == "#":
             # TRIED TO MOVE ONTO A PLAYER, STAY STILL
-            # print(f"{index} invalid move onto player")
+            # print(f"{index} invalid move onto player or cross")
 
             new_x = current_x
             new_y = current_y
@@ -467,6 +467,7 @@ class Fight(object):
     def __new_get_sight(self, board, x, y):
         cross_centers = self.cross_centers
         size = self.board_size
+        originalx, originaly = x, y
         for center in cross_centers:
             centx, centy = center
             # print(f"Working on ({centx},{centy})")
@@ -486,7 +487,7 @@ class Fight(object):
                         continue
                     if save:
                         pnts_touching.append(pnt)
-                if len(to_check) <= 2:
+                if len(to_check) == 2:
                     touching = True
             if touching:
                 # print("Yes touching")
@@ -521,57 +522,49 @@ class Fight(object):
                     "y": y
                 },
                 "cross_corners": [],
-                "vectors": [],
                 "outside_corners": [],
-                }
+            }
             for corner in save:
                 tx, ty = corner
-                temp = (tx, ty)
-                triangle_details["cross_corners"].append(temp)
-                # print(f"Adding {temp} as the corner")
-                vector = (x-tx,y-ty)
-                # print(f"Adding {vector} as the vector")
-
-                triangle_details['vectors'].append(vector)
-
-            ctr = 0
-            for cross_pnt in triangle_details["cross_corners"]:
-                tx, ty = cross_pnt
-                xchange,ychange = triangle_details["vectors"][ctr]
-                # print(f"Finding outside corners from ({x},{y}) with vector ({xchange},{ychange})")
-                newx = tx
-                newy = ty
+                # board[tx][ty] = "@"
+                triangle_details['cross_corners'].append(corner)
+                xchange = x - tx
+                ychange = y - ty
+                # print(f"From ({x},{y}) to corner ({tx},{ty}) with vector ({xchange},{ychange})")
+                if xchange == 0 or ychange == 0:
+                    newx = x
+                    newy = y
+                else:
+                    newx = tx
+                    newy = ty
                 while True:
-                    # if x >= tx:
-                    #     newx -=xchange
-                    # if y >= ty:
-                    #     newy -=ychange
-                    # else:
-                    #     newy += ychange
-                    newx -= xchange
-
-                    newy -= ychange
                     if ychange == 0:
                         # kill = True
                         if xchange > 0:
-                            newy = -1
+                            newx = -1 * size
                         else:
-                            newy = size
+                            newx = size * size
+                    else:
+                        if not touching:
+                            newx -= xchange
+
                     if xchange == 0:
                         # kill = True
                         if ychange > 0:
-                            newy = -1
+                            newy = -1 * size
                         else:
-                            newy = size
+                            newy = size * size
+                    else:
+                        if not touching:
+                            newy -= ychange
 
                     # print(f"Eval ({newx},{newy})")
-                    if (newx < 0 or newx>=size) or (newy < 0 or newy>=size):
+                    if (newx < 0 or newx >= size) or (newy < 0 or newy >= size):
                         break
-                outside_corner = (newx,newy)
+                outside_corner = (newx, newy)
                 # print(f"Adding {outside_corner} as an outside corner")
 
                 triangle_details['outside_corners'].append(outside_corner)
-                ctr += 1
             # print(triangle_details)
             small_triangle = (triangle_details["corner_player"]["x"],
                               triangle_details["corner_player"]["y"],
@@ -598,24 +591,25 @@ class Fight(object):
                     # if that point is inside the large triangle and not inside the small triangle we cant see there
                     if inside_large and not inside_small and board[testx][testy]:
                         board[testx][testy] = " "
-        # if kill:
-        #     string_board = np.array(board).T
-        #     float_board = np.zeros(string_board.shape + (3,))
-        #     switch = {
-        #         ' ': (0, 0, 0),
-        #         '.': (0.5, 0.5, 0.5),
-        #         '#': (0.2, 0.2, 0.2),
-        #         '1': (1, 0, 0),
-        #         '2': (0, 1, 0)
-        #     }
-        #     for index, value in np.ndenumerate(string_board):
-        #         x, y = index
-        #         float_board[x][y] = switch[value]
-        #     fig, ax = plt.subplots(1)
-        #     ax.imshow(float_board)
-        #     for center in cross_centers:
-        #         ax.add_patch(Circle(center, radius=0.4, color='blue'))
-        #     plt.show()
+
+        string_board = np.array(board).T
+        float_board = np.zeros(string_board.shape + (3,))
+        switch = {
+            '@': (0,0,1),
+            ' ': (0, 0, 0),
+            '.': (0.5, 0.5, 0.5),
+            '#': (0.2, 0.2, 0.2),
+            '1': (1, 0, 0),
+            '2': (0, 1, 0)
+        }
+        for index, value in np.ndenumerate(string_board):
+            x, y = index
+            float_board[x][y] = switch[value]
+        fig, ax = plt.subplots(1)
+        ax.imshow(float_board)
+        for center in cross_centers:
+            ax.add_patch(Circle(center, radius=0.4, color='blue'))
+        plt.show()
         #     sys.exit()
 
         return board
