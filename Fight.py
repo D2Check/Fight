@@ -530,18 +530,17 @@ class Fight(object):
                 triangle_details['cross_corners'].append(corner)
                 xchange = x - tx
                 ychange = y - ty
-                # print(f"From ({x},{y}) to corner ({tx},{ty}) with vector ({xchange},{ychange})")
                 if xchange == 0 or ychange == 0:
                     newx = x
                     newy = y
                 else:
                     newx = tx
                     newy = ty
+                print(f"From ({x},{y}) to corner ({tx},{ty}) with vector ({xchange},{ychange})")
                 while True:
                     if ychange == 0:
-                        # kill = True
                         if xchange > 0:
-                            newx = -1 * size
+                            newx = -1 * size * size
                         else:
                             newx = size * size
                     else:
@@ -549,9 +548,8 @@ class Fight(object):
                             newx -= xchange
 
                     if xchange == 0:
-                        # kill = True
                         if ychange > 0:
-                            newy = -1 * size
+                            newy = -1 * size * size
                         else:
                             newy = size * size
                     else:
@@ -582,6 +580,8 @@ class Fight(object):
                               )
             for testy in range(size):
                 for testx in range(size):
+                    if board[testx][testy] == " ":
+                        continue
                     ax, ay, bx, by, cx, cy = small_triangle
                     inside_small = self.__is_inside_triangle(
                         ax, ay, bx, by, cx, cy, testx, testy)
@@ -589,28 +589,28 @@ class Fight(object):
                     inside_large = self.__is_inside_triangle(
                         ax, ay, bx, by, cx, cy, testx, testy)
                     # if that point is inside the large triangle and not inside the small triangle we cant see there
-                    if inside_large and not inside_small and board[testx][testy]:
+                    if inside_large and not inside_small:
                         board[testx][testy] = " "
 
-        string_board = np.array(board).T
-        float_board = np.zeros(string_board.shape + (3,))
-        switch = {
-            '@': (0,0,1),
-            ' ': (0, 0, 0),
-            '.': (0.5, 0.5, 0.5),
-            '#': (0.2, 0.2, 0.2),
-            '1': (1, 0, 0),
-            '2': (0, 1, 0)
-        }
-        for index, value in np.ndenumerate(string_board):
-            x, y = index
-            float_board[x][y] = switch[value]
-        fig, ax = plt.subplots(1)
-        ax.imshow(float_board)
-        for center in cross_centers:
-            ax.add_patch(Circle(center, radius=0.4, color='blue'))
-        plt.show()
-        #     sys.exit()
+            string_board = np.array(board).T
+            float_board = np.zeros(string_board.shape + (3,))
+            switch = {
+                '@': (0,0,1),
+                ' ': (0, 0, 0),
+                '.': (0.5, 0.5, 0.5),
+                '#': (0.2, 0.2, 0.2),
+                '1': (1, 0, 0),
+                '2': (0, 1, 0)
+            }
+            for index, value in np.ndenumerate(string_board):
+                x, y = index
+                float_board[x][y] = switch[value]
+            fig, ax = plt.subplots(1)
+            ax.imshow(float_board)
+            for center in cross_centers:
+                ax.add_patch(Circle(center, radius=0.4, color='blue'))
+            plt.show()
+            #     sys.exit()
 
         return board
 
