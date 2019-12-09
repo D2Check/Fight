@@ -497,29 +497,25 @@ class Fight(object):
                 # print("Yes touching")
                 save = pnts_touching
             else:
-                # print("Not touching")
 
-                d = None
-                to_elim = None
-                for pnt in pnts:
-                    px, py = pnt
-                    dist = math.sqrt((px - x) ** 2 + (py - y) ** 2)
-                    if d is None or dist < d:
-                        d = dist
-                        to_elim = pnt
-                pnts.remove(to_elim)
                 perms = permutations(pnts, 2)
-                area = None
                 save = None
+                max_angle = None
                 for i in list(perms):
                     a, b = i
-                    ax, ay = a
-                    bx, by = b
-                    cx, cy = x, y
-                    curr_area = self.__area_of_triangle(ax, ay, bx, by, cx, cy)
-                    if area is None or curr_area >= area:
-                        area = curr_area
+                    P1X, P1Y = x, y
+                    a, b = i
+                    P2X, P2Y = a
+                    P3X, P3Y = b
+                    numerator = P2Y * (P1X - P3X) + P1Y * (P3X - P2X) + P3Y * (P2X - P1X)
+                    denominator = (P2X - P1X) * (P1X - P3X) + (P2Y - P1Y) * (P1Y - P3Y)
+                    ratio = numerator / denominator
+                    angleRad = math.atan(ratio)
+                    degrees = math.degrees(angleRad)
+                    if max_angle is None or degrees > max_angle:
+                        max_angle = degrees
                         save = i
+
             triangle_details = {
                 "corner_player": {
                     "x": x,
@@ -618,7 +614,7 @@ class Fight(object):
         axis.imshow(float_board)
         for center in cross_centers:
             axis.add_patch(Circle(center, radius=0.4, color='blue'))
-            plt.show()
+        plt.show()
         #     sys.exit()
 
         return board
@@ -769,4 +765,4 @@ if __name__ == "__main__":
     f.add_players(players)
     f.add_crosses()
     # f.print_board()
-    print(f.fight())
+    print(f.fight(interval=.5))
