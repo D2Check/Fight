@@ -14,6 +14,7 @@ colorama.init()
 import_player = lambda name: getattr(
     __import__('players.' + name, fromlist=['']), name)
 
+group_to_pairs = lambda array: [(array[i],array[i+1]) for i in range(0,len(array),2)]
 
 class Fight(object):
     cross_centers = None
@@ -465,6 +466,9 @@ class Fight(object):
         return
 
     def __new_get_sight(self, board, x, y):
+        # for visualization
+        fig, axis = plt.subplots(1)
+
         cross_centers = self.cross_centers
         size = self.board_size
         originalx, originaly = x, y
@@ -557,7 +561,7 @@ class Fight(object):
                             newy -= ychange
 
                     # print(f"Eval ({newx},{newy})")
-                    if (newx < 0 or newx >= size) or (newy < 0 or newy >= size):
+                    if (newx < -size or newx >= size*2) or (newy < -size or newy >= size*2):
                         break
                 outside_corner = (newx, newy)
                 # print(f"Adding {outside_corner} as an outside corner")
@@ -578,6 +582,11 @@ class Fight(object):
                               triangle_details["outside_corners"][1][0],
                               triangle_details["outside_corners"][1][1],
                               )
+
+            # add triangle as patch to visualization
+            axis.add_patch(plt.Polygon(group_to_pairs(small_triangle), color='white', alpha=0.15))
+            axis.add_patch(plt.Polygon(group_to_pairs(large_triangle), color='white', alpha=0.15))
+
             for testy in range(size):
                 for testx in range(size):
                     if board[testx][testy] == " ":
@@ -605,12 +614,12 @@ class Fight(object):
             for index, value in np.ndenumerate(string_board):
                 x, y = index
                 float_board[x][y] = switch[value]
-            fig, ax = plt.subplots(1)
-            ax.imshow(float_board)
-            for center in cross_centers:
-                ax.add_patch(Circle(center, radius=0.4, color='blue'))
+        
+        axis.imshow(float_board)
+        for center in cross_centers:
+            axis.add_patch(Circle(center, radius=0.4, color='blue'))
             plt.show()
-            #     sys.exit()
+        #     sys.exit()
 
         return board
 
