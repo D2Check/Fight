@@ -502,7 +502,6 @@ class Fight(object):
                 save = None
                 max_angle = None
                 for i in list(perms):
-                    a, b = i
                     P1X, P1Y = x, y
                     a, b = i
                     P2X, P2Y = a
@@ -597,19 +596,19 @@ class Fight(object):
                     if inside_large and not inside_small:
                         board[testx][testy] = " "
 
-            string_board = np.array(board).T
-            float_board = np.zeros(string_board.shape + (3,))
-            switch = {
-                '@': (0,0,1),
-                ' ': (0, 0, 0),
-                '.': (0.5, 0.5, 0.5),
-                '#': (0.2, 0.2, 0.2),
-                '1': (1, 0, 0),
-                '2': (0, 1, 0)
-            }
-            for index, value in np.ndenumerate(string_board):
-                x, y = index
-                float_board[x][y] = switch[value]
+        string_board = np.array(board).T
+        float_board = np.zeros(string_board.shape + (3,))
+        switch = {
+            '@': (0,0,1),
+            ' ': (0, 0, 0),
+            '.': (0.5, 0.5, 0.5),
+            '#': (0.2, 0.2, 0.2),
+            '1': (1, 0, 0),
+            '2': (0, 1, 0)
+        }
+        for index, value in np.ndenumerate(string_board):
+            x, y = index
+            float_board[x][y] = switch[value]
         
         axis.imshow(float_board)
         for center in cross_centers:
